@@ -105,32 +105,48 @@ export class Backup {
         this._save(state);
     }
 
-    restore(isDark) {
+    // Puts back what Paletka changed and nothing else. Each item is restored
+    // on its own, so one failure does not leave the rest applied.
+    restore(isDark, log = () => {}) {
         const state = this.state();
         if (!state)
             return;
         for (const {ref, value, isDefault} of state.settings) {
-            if (!this._settings.exists(ref))
-                continue;
             const key = keyOf(ref);
-            if (key in state.written && !same(this._settings.get(ref), state.written[key]))
-                continue;
-            const restored = VARIANT_AWARE_KEYS.includes(ref.key) ? yaruForScheme(value, isDark) : value;
-            if (isDefault && same(restored, value))
-                // Keep following the schema default instead of pinning today's value.
-                this._settings.reset(ref);
-            else
-                this._settings.set(ref, restored);
+            try {
+                // Never written by Paletka, or changed by the user since: keep it.
+                if (!(key in state.written) || !this._settings.exists(ref) ||
+                    !same(this._settings.get(ref), state.written[key]))
+                    continue;
+                const restored = VARIANT_AWARE_KEYS.includes(ref.key) ? yaruForScheme(value, isDark) : value;
+                if (isDefault && same(restored, value))
+                    // Keep following the schema default instead of pinning today's value.
+                    this._settings.reset(ref);
+                else
+                    this._settings.set(ref, restored);
+            } catch (e) {
+                log(`cannot restore ${ref.schema} ${ref.key}: ${e.message}`);
+            }
         }
         for (const {path, existed, copy, symlink} of state.files) {
-            const current = this._fs.readText(path);
-            if (current !== null && !hasGeneratedHeader(current))
-                continue;
-            this._fs.remove(path);
-            if (symlink)
-                this._fs.symlink(symlink, path);
-            else if (existed)
-                this._fs.copyFile(copy, path);
+            try {
+                const current = this._fs.readText(path);
+                if (current !== null && !hasGeneratedHeader(current)) {
+                    // Someone wrote a new file meanwhile; keep it, but never lose the original.
+                    if (existed && !symlink) {
+                        this._fs.copyFile(copy, `${path}.paletka-original`);
+                        log(`${path} was replaced meanwhile; the original is in ${path}.paletka-original`);
+                    }
+                    continue;
+                }
+                this._fs.remove(path);
+                if (symlink)
+                    this._fs.symlink(symlink, path);
+                else if (existed)
+                    this._fs.copyFile(copy, path);
+            } catch (e) {
+                log(`cannot restore ${path}: ${e.message}`);
+            }
         }
         this.clear();
     }

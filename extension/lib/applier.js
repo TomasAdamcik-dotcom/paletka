@@ -365,7 +365,7 @@ export class Applier {
 
     async restoreSystem(isDark, {restartServices}) {
         if (this._backup.has()) {
-            this._backup.restore(isDark);
+            this._backup.restore(isDark, this._log);
         } else {
             // No snapshot (lost or never taken): at least drop our generated files.
             for (const path of [this._paths.gtk4Css, this._paths.gtk3Css]) {
@@ -403,8 +403,10 @@ export class Applier {
             if (name.startsWith('paletka-') && name.endsWith('.xml'))
                 this._fs.remove(`${this._paths.sourceStylesDir}/${name}`);
         }
+        // Our GTK3 themes import adw-gtk3; keep it while one of them is still there.
         const current = this._settings.exists(REFS.gtkTheme) ? this._settings.get(REFS.gtkTheme) : '';
-        if (ADW_GTK3_NAMES.includes(current))
+        if (ADW_GTK3_NAMES.includes(current) || current.startsWith('paletka-') ||
+            this._fs.listDir(this._paths.userThemesDir).some(n => n.startsWith('paletka-')))
             return;
         for (const name of ADW_GTK3_NAMES) {
             const dir = `${this._paths.userThemesDir}/${name}`;
