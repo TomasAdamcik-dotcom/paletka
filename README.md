@@ -14,15 +14,17 @@ palette). Each family has a light and a dark variant.
 
 ## Install
 
-From [extensions.gnome.org](https://extensions.gnome.org) (or the *Extension Manager* app),
-or from source:
+Download `paletka@adamciktomas.github.io.shell-extension.zip` from the
+[latest release](https://github.com/TomasAdamcik-dotcom/paletka/releases/latest) and install it:
 
 ```bash
-make install
+gnome-extensions install --force paletka@adamciktomas.github.io.shell-extension.zip
 ```
 
+Or build and install from source with `make install`.
+
 Then log out and back in (Wayland loads new extensions only at login) and enable it with
-`gnome-extensions enable paletka@adamciktomas.github.io`.
+`gnome-extensions enable paletka@adamciktomas.github.io` (or in the Extensions app).
 
 ## Turning it off and uninstalling
 

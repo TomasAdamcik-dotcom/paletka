@@ -11,9 +11,13 @@ comes as a *family* with a light and a dark variant.
 
 ## Installing
 
-1. Open [extensions.gnome.org](https://extensions.gnome.org), search for **Paletka** and
-   switch it on — or install it from the *Extension Manager* app.
-2. If it does not show up right away, log out and back in.
+1. Download `paletka@adamciktomas.github.io.shell-extension.zip` from the
+   [latest release](https://github.com/TomasAdamcik-dotcom/paletka/releases/latest).
+2. In a terminal, in the folder with the file, run
+   `gnome-extensions install --force paletka@adamciktomas.github.io.shell-extension.zip`.
+3. Log out and back in.
+4. Turn on **Paletka** in the **Extensions** app (or run
+   `gnome-extensions enable paletka@adamciktomas.github.io`).
 
 ## Switching themes
 

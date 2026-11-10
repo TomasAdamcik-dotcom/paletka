@@ -11,9 +11,13 @@ verziou.
 
 ## Inštalácia
 
-1. Otvor [extensions.gnome.org](https://extensions.gnome.org), vyhľadaj **Paletka** a zapni
-   ju — alebo ju nainštaluj z aplikácie *Extension Manager*.
-2. Ak sa hneď neukáže, odhlás sa a znova prihlás.
+1. Stiahni `paletka@adamciktomas.github.io.shell-extension.zip` z
+   [najnovšieho vydania](https://github.com/TomasAdamcik-dotcom/paletka/releases/latest).
+2. V termináli v priečinku so súborom spusti
+   `gnome-extensions install --force paletka@adamciktomas.github.io.shell-extension.zip`.
+3. Odhlás sa a znova prihlás.
+4. Zapni **Paletku** v aplikácii **Rozšírenia** (alebo príkazom
+   `gnome-extensions enable paletka@adamciktomas.github.io`).
 
 ## Prepínanie tém
 
