@@ -321,10 +321,7 @@ for (const [name, id] of [['Gruvbox', 'gruvbox'], ['Nord', 'nord'], ['Dracula', 
             waitFor('install suggestion', () => evalShell(
                 `Main.messageTray.getSources().flatMap(s => s.notifications.map(n => n.title))`).includes(title));
             const find = `Main.messageTray.getSources().flatMap(s => s.notifications).find(n => n.title === ${JSON.stringify(title)})`;
-            assert(evalShell(`${find}.urgency`) === 3, 'critical banner stays on screen');
-            sleep(5000);
-            assert(evalShell(`Main.messageTray._notification?.title ?? null`) === title, 'still shown after 5 s');
-            waitFor('banner hidden after ~10 s', () => evalShell(`Main.messageTray._notification?.title ?? null`) !== title, 9000);
+            assert(evalShell(`${find}.urgency`) === 1, 'regular banner');
             assert(evalShell(`${find} !== undefined`), 'kept in the notification list');
             evalShell(`(() => { ${find}.actions.find(a => a.label === 'Install theme').activate(); return true; })()`);
             waitFor('code CLI called', () => read(`${GLib.get_home_dir()}/code-calls.log`)

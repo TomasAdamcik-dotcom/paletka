@@ -33,8 +33,10 @@ What changes right away:
 - VS Code, if the matching VS Code theme is installed.
 
 When you switch to a *different* theme family, apps that are already open keep their old
-colors until you reopen them. **Files** is restarted for you and reopens its windows — but
-never while it is copying files; it waits until the copy finishes.
+colors until you reopen them. **Files** is restarted for you and reopens its windows. It
+waits while Files is working — copying, moving, deleting, transferring to a phone or a network
+location, or asking you something in a dialog. The check watches activity, so with very large
+file operations it is safest to switch themes after they finish.
 
 ### VS Code
 

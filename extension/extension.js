@@ -1,6 +1,7 @@
 // Paletka: switch whole-desktop theme families from Quick Settings.
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
@@ -20,11 +21,9 @@ import {ThemeStore} from './lib/store.js';
 import {ThemeIndicator} from './lib/toggle.js';
 import {fmt} from './lib/format.js';
 import {installVscodeExtensions} from './lib/vscodeInstaller.js';
-import {continuousActivity, sampleIo} from './lib/activity.js';
+import {continuousActivity, sampleIo, findProcesses} from './lib/activity.js';
 
 const SCHEME_DEBOUNCE_MS = 150;
-// How long the VS Code install suggestion stays on screen.
-const VSCODE_NOTICE_MS = 10000;
 const NAUTILUS = 'org.gnome.Nautilus.desktop';
 // D-Bus names owned by the apps' processes in this session.
 const BUS_NAMES = {
@@ -364,11 +363,27 @@ export default class PaletkaExtension extends Extension {
         }
     }
 
-    // True when the app shows file I/O in each of three consecutive seconds.
+    // A dialog of the app (e.g. Files asking what to do with an existing file
+    // in the middle of a copy) means work is waiting for the user.
+    _hasDialog(appId) {
+        const app = Shell.AppSystem.get_default().lookup_app(appId);
+        return (app?.get_windows() ?? []).some(w => w.get_transient_for() !== null ||
+            [Meta.WindowType.DIALOG, Meta.WindowType.MODAL_DIALOG].includes(w.get_window_type()));
+    }
+
+    // True when the app has a dialog open, or shows file work in each of three
+    // consecutive seconds. For Files this includes the gvfsd processes that do
+    // the transfers for phones, cameras and network locations.
     async _isBusy(appId) {
+        if (this._hasDialog(appId))
+            return true;
         const pids = await this._pidsFor(appId);
         if (pids.length === 0 || !this._fs)
             return false;
+        if (appId === NAUTILUS) {
+            const uid = Number(/^Uid:\s*(\d+)/m.exec(this._fs.readText('/proc/self/status') ?? '')?.[1]);
+            pids.push(...findProcesses(this._fs, 'gvfsd', uid));
+        }
         const samples = [];
         for (let i = 0; i < 4; i++) {
             if (i)
@@ -441,22 +456,6 @@ export default class PaletkaExtension extends Extension {
         }
     }
 
-    // Shows a banner for `ms` instead of GNOME's 4 s: critical banners stay
-    // (expanded, with their buttons) until hidden; it remains in the list.
-    _showFor(source, notification, ms) {
-        notification.urgency = MessageTray.Urgency.CRITICAL;
-        source.addNotification(notification);
-        const id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ms, () => {
-            this._sleepIds?.delete(id);
-            notification.urgency = MessageTray.Urgency.NORMAL;
-            const tray = Main.messageTray;
-            if (tray._notification === notification)
-                tray._expireNotification?.();
-            return GLib.SOURCE_REMOVE;
-        });
-        this._sleepIds?.add(id);
-    }
-
     _suggestVscodeInstall({family, name, extensions}) {
         if (this._vscodeSuggested.has(family))
             return;
@@ -472,7 +471,8 @@ export default class PaletkaExtension extends Extension {
             if (this._alive(generation))
                 this._installVscodeThemes(extensions);
         });
-        this._showFor(source, notification, VSCODE_NOTICE_MS);
+        // A regular banner; it stays in the notification list with its button.
+        source.addNotification(notification);
     }
 
     _noticeSourceFor() {

@@ -112,9 +112,14 @@ After a family switch: `systemctl --user try-restart xdg-desktop-portal-gnome.se
 
 - Files with open windows is restarted right away and its windows are reopened at their
   first location (`org.freedesktop.FileManager1` `OpenWindowsWithLocations`).
-- `nautilus --quit` aborts running copies, so the Files process (PID of the session D-Bus
-  name owner) is sampled from `/proc/<pid>/io` for 3 s first; while I/O is continuous the
-  restart is retried every 30 s.
+- `nautilus --quit` aborts running file operations, so Files counts as busy when one of its
+  windows is a dialog (conflict or error questions), or when, in each of three consecutive
+  seconds, the Files process (PID of the session D-Bus name owner) plus the user's `gvfsd*`
+  processes (phone, camera and network transfers) show I/O (`/proc/<pid>/io`) or CPU time
+  (`/proc/<pid>/stat`, catches large deletes). While busy, the restart is retried every 30 s.
+  It is a heuristic: an operation that pauses for seconds without a dialog is not seen.
+- Only one Files restart runs at a time; switches made meanwhile get one more restart.
+  Windows are reopened with `org.freedesktop.FileManager1.ShowFolders`.
 - Apps without windows are quit once their last window closes.
 
 ## Enable and disable
@@ -142,9 +147,9 @@ is hooked so that clicking it while a custom family is active switches to `ubunt
 ## Notifications
 
 - legacy `gtk.css` warning;
-- missing VS Code theme: critical banner with **Install theme** (runs
-  `code --install-extension <id>`), expired after 10 s but kept in the list, once per family
-  per session;
+- missing VS Code theme: a regular banner from Paletka's own notification source with
+  **Install theme** (runs `code --install-extension <id>`), kept in the notification list,
+  once per family per session; the source is destroyed in `disable()`;
 - "Theme changed" when open apps need a reopen.
 
 ## Tests
