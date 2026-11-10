@@ -1,4 +1,5 @@
 import {test, assert, assertEq, tmpDir} from './harness.js';
+import GLib from 'gi://GLib';
 import {GioFs} from '../extension/lib/adapters.js';
 import {JsonFileSettings, CompositeSettings} from '../extension/lib/jsonFileSettings.js';
 
@@ -62,4 +63,39 @@ test('jsonFileSettings: writes through a symlinked settings.json', () => {
     assertEq(JSON.parse(fs.readText(`${d}/dotfiles/settings.json`)), {a: 1, b: true});
     s.reset(r);
     assertEq(fs.readText(`${d}/dotfiles/settings.json`), '{\n    "a": 1\n}\n');
+});
+
+test('jsonFileSettings: an existing file that cannot be read is left alone', () => {
+    const d = tmpDir();
+    const path = `${d}/settings.json`;
+    fs.writeText(path, '{ "mine": 1 }\n');
+    GLib.chmod(path, 0o000);
+    const s = new JsonFileSettings({fs, log: () => {}});
+    assertEq(s.exists(ref(path, 'a')), false);
+    GLib.chmod(path, 0o644);
+    assertEq(fs.readText(path), '{ "mine": 1 }\n');
+});
+
+test('jsonFileSettings: an existing empty file is left alone', () => {
+    const d = tmpDir();
+    const path = `${d}/settings.json`;
+    GLib.file_set_contents(path, '');
+    const s = new JsonFileSettings({fs, log: () => {}});
+    assertEq(s.exists(ref(path, 'a')), false);
+});
+
+test('jsonFileSettings: an edit that would break the file is not written', () => {
+    const d = tmpDir();
+    const path = `${d}/settings.json`;
+    const text = '{ // c\n"k": 1 }';
+    fs.writeText(path, text);
+    const s = new JsonFileSettings({fs, log: () => {}});
+    let threw = false;
+    try {
+        s.reset(ref(path, 'k'));
+    } catch {
+        threw = true;
+    }
+    assert(threw, 'reset refused');
+    assertEq(fs.readText(path), text);
 });

@@ -21,9 +21,24 @@ export class JsonFileSettings {
         return GLib.path_is_absolute(link) ? link : GLib.build_filenamev([GLib.path_get_dirname(path), link]);
     }
 
+    // A missing file reads as an empty object. An existing file that cannot be
+    // read, or is empty (e.g. VS Code is in the middle of writing it), must
+    // never be treated as empty: writing it would replace the user's settings.
     _read(path) {
         const text = this._fs.readText(path);
-        return text === null || text.trim() === '' ? '{}\n' : text;
+        if (text === null && !this._fs.exists(path))
+            return '{}\n';
+        if (text === null || text.trim() === '')
+            throw new Error('cannot read it or it is empty');
+        return text;
+    }
+
+    // Writes an edit only if the result still parses and holds the intended value.
+    _write(path, text, key, value) {
+        const parsed = parseJsonc(text);
+        if (JSON.stringify(parsed[key]) !== JSON.stringify(value ?? undefined))
+            throw new Error(`editing ${key} in ${path} would break the file`);
+        this._fs.writeText(this._target(path), text);
     }
 
     exists(ref) {
@@ -33,7 +48,7 @@ export class JsonFileSettings {
             parseJsonc(this._read(ref.path));
             return true;
         } catch (e) {
-            const msg = `leaving ${ref.path} alone, cannot parse it: ${e.message}`;
+            const msg = `leaving ${ref.path} alone: ${e.message}`;
             if (msg !== this._lastError)
                 this._log(msg);
             this._lastError = msg;
@@ -51,13 +66,20 @@ export class JsonFileSettings {
     }
 
     set(ref, value) {
-        this._fs.writeText(this._target(ref.path), setTopLevel(this._read(ref.path), ref.key, value));
+        this._write(ref.path, setTopLevel(this._read(ref.path), ref.key, value), ref.key, value);
     }
 
     reset(ref) {
-        const text = this._fs.readText(ref.path);
-        if (text !== null)
-            this._fs.writeText(this._target(ref.path), removeTopLevel(text, ref.key));
+        if (!this._fs.exists(ref.path))
+            return;
+        let text;
+        try {
+            text = removeTopLevel(this._read(ref.path), ref.key);
+            parseJsonc(text);
+        } catch (e) {
+            throw new Error(`editing ${ref.key} in ${ref.path} would break the file: ${e.message}`);
+        }
+        this._write(ref.path, text, ref.key, undefined);
     }
 }
 
