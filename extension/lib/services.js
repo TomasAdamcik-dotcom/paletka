@@ -91,6 +91,8 @@ export class Services {
             this._pending.delete(appId);
             if (epoch !== this._epoch)
                 return;
+            if (appId === NAUTILUS && this._filesRestarting)
+                return;
             if (this._hasWindows(appId)) {
                 if (this._whenHidden)
                     this._pending.set(appId, this._whenHidden(appId, attempt));
@@ -104,6 +106,8 @@ export class Services {
             if (epoch !== this._epoch)
                 return;
             // The check takes a few seconds; the user may have reopened it meanwhile.
+            if (appId === NAUTILUS && this._filesRestarting)
+                return;
             if (this._hasWindows(appId)) {
                 await attempt();
                 return;
@@ -141,7 +145,13 @@ export class Services {
 
     // Restart open Files so its windows pick up the new theme; while it is
     // copying, try again later. Closed Files is left to the normal quit.
+    // Only one restart runs at a time; switches made meanwhile are covered by
+    // one more restart afterwards.
     async restartFilesWhenIdle() {
+        if (this._filesRestarting) {
+            this._filesAgain = true;
+            return;
+        }
         this._pending.get(FILES_RESTART)?.();
         this._pending.delete(FILES_RESTART);
         const epoch = this._epoch;
@@ -149,9 +159,21 @@ export class Services {
             this._pending.delete(FILES_RESTART);
             if (epoch !== this._epoch || !this._hasWindows(NAUTILUS))
                 return;
-            const result = await this.restartFiles();
-            if (!result.ok && epoch === this._epoch)
+            this._filesRestarting = true;
+            let result;
+            try {
+                result = await this.restartFiles();
+            } finally {
+                this._filesRestarting = false;
+            }
+            if (epoch !== this._epoch)
+                return;
+            const again = this._filesAgain;
+            this._filesAgain = false;
+            if (!result.ok)
                 this._pending.set(FILES_RESTART, this._later(RETRY_MS, attempt));
+            else if (again)
+                await this.restartFilesWhenIdle();
         };
         await attempt();
     }

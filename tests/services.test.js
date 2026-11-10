@@ -279,3 +279,27 @@ test('services: restartFiles stops when destroyed during the busy check', async 
     assertEq((await services.restartFiles()).ok, false);
     assertEq(calls, []);
 });
+
+test('services: rapid switches never run two Files restarts at once', async () => {
+    const calls = [];
+    let running = 0, maxRunning = 0;
+    const services = new Services({
+        spawn: async argv => calls.push(argv.join(' ')),
+        hasWindows: id => id === NAUTILUS,
+        isBusy: async () => {
+            running++;
+            maxRunning = Math.max(maxRunning, running);
+            await new Promise(r => setTimeout(r, 20));
+            running--;
+            return false;
+        },
+        getWindowLocations: async () => [['file:///home/u/a']],
+        openFolder: async uri => calls.push(`open ${uri}`),
+        later: () => () => {},
+        log: () => {},
+    });
+    await Promise.all([services.restartFilesWhenIdle(), services.restartFilesWhenIdle(), services.restartFilesWhenIdle()]);
+    assertEq(maxRunning, 1);
+    // the switches made meanwhile are covered by one more restart
+    assertEq(calls.filter(c => c === 'nautilus --quit').length, 2);
+});
