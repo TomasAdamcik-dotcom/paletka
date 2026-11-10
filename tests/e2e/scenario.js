@@ -265,19 +265,50 @@ step('6. editing the active theme re-applies it', () => {
 });
 
 step('7. disable/enable twice leaves one tile and one stylesheet', () => {
+    const active = ext.get_string('active-family');
+    const theme = iface.get_string('gtk-theme');
+    assert(theme.startsWith('paletka-'), `custom family active: ${theme}`);
     for (let i = 0; i < 2; i++) {
         call('org.gnome.Shell', '/org/gnome/Shell', 'org.gnome.Shell.Extensions', 'DisableExtension',
             new GLib.Variant('(s)', [UUID]), '(b)');
         waitFor('disabled', () => extensionInfo().state !== 1);
         assert(toggleInfo().count === 0, 'tile removed on disable');
         assert(ourStylesheets().length === 0, 'stylesheet removed on disable');
+        // Turning the extension off restores the original look and cleans up.
+        assert(read(`${CONFIG}/gtk-4.0/gtk.css`) === FOREIGN_CSS, 'foreign gtk.css restored on disable');
+        assert(iface.get_string('gtk-theme') === 'Yaru-dark', `gtk-theme ${iface.get_string('gtk-theme')}`);
+        assert(read(VSCODE_PATH) === VSCODE_SETTINGS, 'vscode settings restored on disable');
+        assert(!GLib.file_test(`${DATA}/gtksourceview-5/styles/paletka-nord-dark.xml`, GLib.FileTest.EXISTS),
+            'text editor schemes removed');
+        assert(!GLib.file_test(`${DATA}/themes/adw-gtk3`, GLib.FileTest.EXISTS), 'bundled adw-gtk3 removed');
+        assert(ext.get_string('active-family') === active, 'choice kept for the next enable');
         call('org.gnome.Shell', '/org/gnome/Shell', 'org.gnome.Shell.Extensions', 'EnableExtension',
             new GLib.Variant('(s)', [UUID]), '(b)');
         waitFor('enabled', () => extensionInfo().state === 1);
     }
     waitFor('one tile', () => toggleInfo().count === 1);
     waitFor('one stylesheet', () => ourStylesheets().length === 1);
+    waitFor('theme applied again', () => iface.get_string('gtk-theme') === theme);
+    assert(read(`${CONFIG}/gtk-4.0/gtk.css`)?.startsWith(HEADER), 'gtk4 css applied again');
     assert(!extensionInfo().error, 'no error');
+});
+
+step('7a. disabling an extension enabled earlier does not reset the theme', () => {
+    // After step 7 this extension was enabled after the helper, so turning the
+    // helper off makes the shell disable and re-enable this one.
+    const theme = iface.get_string('gtk-theme');
+    const seen = [];
+    const id = iface.connect('changed::gtk-theme', () => seen.push(iface.get_string('gtk-theme')));
+    for (const method of ['DisableExtension', 'EnableExtension']) {
+        call('org.gnome.Shell', '/org/gnome/Shell', 'org.gnome.Shell.Extensions', method,
+            new GLib.Variant('(s)', ['helper@paletka.test']), '(b)');
+        sleep(1500);
+    }
+    iface.disconnect(id);
+    waitFor('enabled', () => extensionInfo().state === 1);
+    assert(seen.every(t => t.startsWith('paletka-')), `gtk-theme changed: ${seen}`);
+    assert(iface.get_string('gtk-theme') === theme, 'theme kept');
+    waitFor('one tile', () => toggleInfo().count === 1);
 });
 
 for (const [name, id] of [['Gruvbox', 'gruvbox'], ['Nord', 'nord'], ['Dracula', 'dracula']]) {

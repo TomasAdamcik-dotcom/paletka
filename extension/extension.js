@@ -7,6 +7,7 @@ import St from 'gi://St';
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
+import {ExtensionState} from 'resource:///org/gnome/shell/misc/extensionUtils.js';
 
 import {GioFs, GioSettingsAdapter} from './lib/adapters.js';
 import {CompositeSettings, JsonFileSettings} from './lib/jsonFileSettings.js';
@@ -102,15 +103,18 @@ export default class PaletkaExtension extends Extension {
         this._syncLocked();
 
         this._refreshToggle();
-        this._enqueue(() => this._restoreOnEnable());
+        this._enqueue(generation => this._restoreOnEnable(generation));
     }
 
     // session-modes includes unlock-dialog so the shell theme stays applied on the
-    // lock screen (the tile is hidden while locked); disable() therefore only runs
-    // when the extension is really turned off, and it never reverts the user's
-    // gsettings or gtk.css (that is what choosing the Ubuntu theme does).
+    // lock screen (the tile is hidden while locked), and the shell does not
+    // disable extensions at logout. When the user turns the extension off or
+    // uninstalls it, the original look is restored; the chosen family stays in
+    // the settings and is applied again by the next enable().
     disable() {
         this._generation++;
+        if (this._isTurnedOff())
+            this._restoreForDisable();
         if (this._schemeTimeoutId) {
             GLib.source_remove(this._schemeTimeoutId);
             this._schemeTimeoutId = 0;
@@ -142,6 +146,25 @@ export default class PaletkaExtension extends Extension {
         this._fs = null;
         this._queue = null;
         this._logger = null;
+    }
+
+    // Disabling another extension that was enabled earlier makes the shell
+    // disable and re-enable this one right away; only a real turn-off (or an
+    // uninstall or update) marks this extension as deactivating.
+    _isTurnedOff() {
+        const state = Main.extensionManager.lookup(this.uuid)?.state;
+        return state === ExtensionState.DEACTIVATING;
+    }
+
+    _restoreForDisable() {
+        try {
+            if (!isSystem(this._activeFamily()) || this._applier.isApplied())
+                // Synchronous without the service restart; open apps pick it up when reopened.
+                this._applier.restoreSystem(this._isDark(), {restartServices: false}).catch(e => this._logger.error(`restore failed: ${e.message}`));
+            this._applier.removeLeftovers();
+        } catch (e) {
+            this._logger.error(`restore on disable failed: ${e.message}`);
+        }
     }
 
     _addIndicator() {
@@ -249,11 +272,16 @@ export default class PaletkaExtension extends Extension {
         return Shell.AppSystem.get_default().get_running().some(app => app.get_n_windows() > 0);
     }
 
-    async _restoreOnEnable() {
+    async _restoreOnEnable(generation) {
         this._applier.writeSourceSchemes(this._families());
         const family = this._activeFamily();
         if (isSystem(family))
             return;
+        // Turned back on after disable() restored the original look: apply it fully.
+        if (!this._applier.isApplied()) {
+            await this._applyActive(generation);
+            return;
+        }
         const {shellCssPath, warnings} = this._applier.applyVariant(family, this._isDark());
         this._loadStylesheet(shellCssPath);
         this._showWarnings(warnings);

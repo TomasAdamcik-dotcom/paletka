@@ -390,4 +390,26 @@ export class Applier {
         if (restartServices)
             await this._services.restart();
     }
+
+    // Whether a custom family is applied (its snapshot of the original look exists).
+    isApplied() {
+        return this._backup.has();
+    }
+
+    // Files that stay useful while the extension is on but must not outlive it:
+    // the Text Editor schemes and the adw-gtk3 copy we installed (unless in use).
+    removeLeftovers() {
+        for (const name of this._fs.listDir(this._paths.sourceStylesDir)) {
+            if (name.startsWith('paletka-') && name.endsWith('.xml'))
+                this._fs.remove(`${this._paths.sourceStylesDir}/${name}`);
+        }
+        const current = this._settings.exists(REFS.gtkTheme) ? this._settings.get(REFS.gtkTheme) : '';
+        if (ADW_GTK3_NAMES.includes(current))
+            return;
+        for (const name of ADW_GTK3_NAMES) {
+            const dir = `${this._paths.userThemesDir}/${name}`;
+            if (this._fs.exists(`${dir}/${MARKER}`))
+                this._fs.removeTree(dir);
+        }
+    }
 }
