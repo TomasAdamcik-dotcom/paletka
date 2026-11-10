@@ -286,3 +286,13 @@ test('applier: a gtk-3.0/gtk.css created after the snapshot is never deleted', a
     await applier.applyFamily(sol, true, {restartServices: false});
     assertEq(fs.readText(paths.gtk3Css), '/* written later by the user */\n');
 });
+
+test('applier: a wallpaper file name with # or % becomes a valid URI', async () => {
+    const {applier, settings, fs, root, sol} = setup();
+    const path = `${root}/wallpaper #2 100%.png`;
+    fs.writeText(path, 'png');
+    const f = JSON.parse(JSON.stringify(sol));
+    f.light.wallpaper = {type: 'file', path};
+    await applier.applyFamily(f, false, {restartServices: false});
+    assertEq(get(settings, keys.uri), `file://${root.replaceAll(' ', '%20')}/wallpaper%20%232%20100%25.png`);
+});

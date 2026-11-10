@@ -25,14 +25,23 @@ export class Backup {
     }
 
     has() {
-        return this._fs.exists(this._statePath);
+        return this.state() !== null;
     }
 
     // Only this extension writes the state file, so it is read once and kept.
     state() {
         if (this._state === undefined) {
             const text = this._fs.readText(this._statePath);
-            this._state = text ? JSON.parse(text) : null;
+            this._state = null;
+            if (text !== null) {
+                try {
+                    this._state = JSON.parse(text);
+                } catch {
+                    // Cut short (e.g. power loss): keep it for inspection, start over.
+                    this._fs.copyFile(this._statePath, `${this._statePath}.broken`);
+                    this._fs.remove(this._statePath);
+                }
+            }
         }
         return this._state;
     }

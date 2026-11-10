@@ -1,4 +1,6 @@
 // Applies a theme family to the desktop through injected adapters.
+import GLib from 'gi://GLib';
+
 import {gtk4Css, gtk3ThemeCss, gtk3ThemeName, gtk3IndexTheme, hasGeneratedHeader, hasLegacyColorDefinitions} from './gtkCss.js';
 import {shellCss} from './shellCss.js';
 import {resolveVariant} from './palette.js';
@@ -213,10 +215,10 @@ export class Applier {
         if (svg) {
             const path = `${this._paths.wallpaperDir}/${family.id}-${variantName(isDark)}.svg`;
             this._fs.writeText(path, svg);
-            return `file://${path}`;
+            return GLib.filename_to_uri(path, null);
         }
         if (spec?.type === 'file' && this._fs.exists(spec.path))
-            return `file://${spec.path}`;
+            return GLib.filename_to_uri(spec.path, null);
         return null;
     }
 
@@ -372,6 +374,16 @@ export class Applier {
                 if (hasGeneratedHeader(this._fs.readText(path)))
                     this._fs.remove(path);
             }
+            // ...and settings that would point at files removed below.
+            const refs = [REFS.gtkTheme, EDITOR_REFS.scheme, this._ptyxisRefs().palette];
+            for (const ref of refs) {
+                try {
+                    if (ref && this._settings.exists(ref) && String(this._settings.get(ref)).startsWith('paletka-'))
+                        this._settings.reset(ref);
+                } catch (e) {
+                    this._log(`cannot reset ${ref.schema} ${ref.key}: ${e.message}`);
+                }
+            }
         }
         for (const name of this._fs.listDir(this._paths.userThemesDir)) {
             if (name.startsWith('paletka-'))
@@ -384,7 +396,7 @@ export class Applier {
         this._fs.removeTree(this._paths.shellCssDir);
         const wallpaperInUse = [REFS.pictureUri, REFS.pictureUriDark]
             .filter(ref => this._settings.exists(ref))
-            .some(ref => String(this._settings.get(ref)).startsWith(`file://${this._paths.wallpaperDir}/`));
+            .some(ref => String(this._settings.get(ref)).startsWith(`${GLib.filename_to_uri(this._paths.wallpaperDir, null)}/`));
         if (!wallpaperInUse)
             this._fs.removeTree(this._paths.wallpaperDir);
         if (restartServices)

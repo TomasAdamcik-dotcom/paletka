@@ -46,3 +46,8 @@ test('gtkCss: detects legacy @define-color surface colors in a foreign gtk.css',
     assertEq(hasLegacyColorDefinitions(gtk4Css(sol)), false);
     assertEq(hasLegacyColorDefinitions(null), false);
 });
+
+test('gtkCss: the import path is a proper file URI', () => {
+    const css = gtk3ThemeCss(sol, true, '/home/a "b"#1%/adw-gtk3-dark/gtk-3.0/gtk.css');
+    assert(css.includes('@import url("file:///home/a%20%22b%22%231%25/adw-gtk3-dark/gtk-3.0/gtk.css");'), css);
+});

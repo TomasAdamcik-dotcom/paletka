@@ -289,10 +289,11 @@ export default class PaletkaExtension extends Extension {
     async _restoreOnEnable(generation) {
         this._applier.writeSourceSchemes(this._families());
         const family = this._activeFamily();
-        if (isSystem(family))
+        if (isSystem(family) && !this._applier.isApplied())
             return;
-        // Turned back on after disable() restored the original look: apply it fully.
-        if (!this._applier.isApplied()) {
+        // Turned back on after disable() restored the original look, or the
+        // active theme file is gone (back to Ubuntu): apply it fully.
+        if (isSystem(family) || !this._applier.isApplied()) {
             await this._applyActive(generation);
             return;
         }

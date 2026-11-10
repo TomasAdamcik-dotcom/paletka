@@ -1,4 +1,5 @@
 import {test, assert, assertEq} from './harness.js';
+import GLib from 'gi://GLib';
 import {setup, keys, VSCODE_SETTINGS} from './applierSetup.js';
 import {normalizeFamily} from '../extension/lib/model.js';
 
@@ -69,4 +70,26 @@ test('restore: a VS Code key Paletka never wrote is not removed', async () => {
     fs.writeText(vscodeSettings, fs.readText(vscodeSettings).replace('"editor.fontSize": 14', '"editor.fontSize": 14,\n    "workbench.preferredDarkColorTheme": "Monokai"'));
     await applier.restoreSystem(false, {restartServices: false});
     assert(fs.readText(vscodeSettings).includes('"Monokai"'), fs.readText(vscodeSettings));
+});
+
+test('backup: an empty or broken state file counts as no backup and is set aside', () => {
+    for (const text of ['', '{ broken']) {
+        const {backup, fs, paths} = setup();
+        GLib.mkdir_with_parents(paths.backupDir, 0o755);
+        GLib.file_set_contents(`${paths.backupDir}/state.json`, text);
+        assertEq(backup.has(), false);
+        assertEq(backup.state(), null);
+        assert(fs.exists(`${paths.backupDir}/state.json.broken`), 'set aside');
+        assertEq(backup.snapshot([{schema: 'org.gnome.desktop.interface', key: 'gtk-theme'}], []), true);
+    }
+});
+
+test('restore without a backup resets settings that still name Paletka files', async () => {
+    const {applier, backup, settings, sol} = setup({defaultKeys: [keys.gtk]});
+    await applier.applyFamily(sol, false, {restartServices: false});
+    backup.clear();
+    await applier.restoreSystem(false, {restartServices: false});
+    assert(!String(get(settings, keys.gtk)).startsWith('paletka-'), `gtk ${get(settings, keys.gtk)}`);
+    assert(!String(get(settings, keys.ptyxisPalette)).startsWith('paletka-'), 'ptyxis');
+    assert(!String(get(settings, keys.editorScheme)).startsWith('paletka-'), 'editor');
 });
