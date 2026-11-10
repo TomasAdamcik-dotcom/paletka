@@ -43,8 +43,8 @@ reopened (light/dark-only apps such as VS Code switch immediately).
 ## Limitations
 
 GTK apps read their colors only at startup: switching to a different family recolors
-already-open app windows the next time they are opened (Files is restarted for you, never
-while it is copying). Light/dark within a family is live. Firefox, Chrome, Electron
+already-open app windows the next time they are opened (Files is restarted for you, waiting
+while it copies, moves, deletes or shows a dialog). Light/dark within a family is live. Firefox, Chrome, Electron
 (other than the light/dark choice), Qt, Flatpak and Snap apps only follow light/dark.
 
 ## Development
@@ -57,6 +57,12 @@ make pot    # refresh po/paletka.pot
 ```
 
 See [docs/technical.md](docs/technical.md) for the architecture.
+
+## License
+
+Paletka is free software: you can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation, either version 2 of
+the License, or (at your option) any later version. See [LICENSE](LICENSE).
 
 ## Credits
 
