@@ -10,6 +10,15 @@ export class ThemeStore {
         this._userDir = userDir;
         this._fs = fs;
         this._log = log;
+        this._logged = new Set();
+    }
+
+    // Themes are reloaded often; report each problem once.
+    _logOnce(msg) {
+        if (this._logged.has(msg))
+            return;
+        this._logged.add(msg);
+        this._log(msg);
     }
 
     get userDir() {
@@ -39,11 +48,11 @@ export class ThemeStore {
                 continue;
             const {family, error} = this._parse(`${this._userDir}/${name}`);
             if (error)
-                this._log(`Paletka: skipping ${name}: ${error}`);
+                this._logOnce(`skipping ${name}: ${error}`);
             else if (BUILTIN_IDS.includes(family.id))
-                this._log(`Paletka: skipping ${name}: id "${family.id}" is reserved`);
+                this._logOnce(`skipping ${name}: id "${family.id}" is reserved`);
             else if (name !== `${family.id}.json`)
-                this._log(`Paletka: skipping ${name}: file name must be "${family.id}.json"`);
+                this._logOnce(`skipping ${name}: file name must be "${family.id}.json"`);
             else
                 result.push(family);
         }

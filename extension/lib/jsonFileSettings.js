@@ -33,7 +33,10 @@ export class JsonFileSettings {
             parseJsonc(this._read(ref.path));
             return true;
         } catch (e) {
-            this._log(`Paletka: leaving ${ref.path} alone, cannot parse it: ${e.message}`);
+            const msg = `leaving ${ref.path} alone, cannot parse it: ${e.message}`;
+            if (msg !== this._lastError)
+                this._log(msg);
+            this._lastError = msg;
             return false;
         }
     }

@@ -118,7 +118,7 @@ export class Applier {
             this._settings.set(ref, value);
             this._backup.recordWritten(ref, value);
         } catch (e) {
-            this._log(`Paletka: cannot set ${ref.schema} ${ref.key}: ${e.message}`);
+            this._log(`cannot set ${ref.schema} ${ref.key}: ${e.message}`);
         }
     }
 
@@ -126,7 +126,7 @@ export class Applier {
         try {
             this._revert(ref, isDark);
         } catch (e) {
-            this._log(`Paletka: cannot revert ${ref.schema} ${ref.key}: ${e.message}`);
+            this._log(`cannot revert ${ref.schema} ${ref.key}: ${e.message}`);
         }
     }
 
@@ -174,7 +174,7 @@ export class Applier {
         if (gtk3 !== null && (hasGeneratedHeader(gtk3) || this._backup.hasCopyOf(this._paths.gtk3Css)))
             this._fs.remove(this._paths.gtk3Css);
         else if (gtk3 !== null)
-            this._log(`Paletka: ${this._paths.gtk3Css} overrides GTK3 theme colors; leaving it in place`);
+            this._log(`${this._paths.gtk3Css} overrides GTK3 theme colors; leaving it in place`);
     }
 
     _iconThemeExists(name) {
@@ -202,7 +202,7 @@ export class Applier {
                 this._fs.writeText(marker, ADW_GTK3_VERSION);
             }
         } catch (e) {
-            this._log(`Paletka: cannot install adw-gtk3: ${e.message}`);
+            this._log(`cannot install adw-gtk3: ${e.message}`);
         }
         return ADW_GTK3_NAMES.every(n => this._themeAvailable(n));
     }

@@ -59,29 +59,32 @@ export class Services {
         this._log = log;
         this._pending = new Map();
         this._epoch = 0;
+        this._destroyed = false;
     }
 
     async _run(argv) {
+        if (this._destroyed)
+            return;
         try {
             await this._spawn(argv);
         } catch (e) {
-            this._log(`Paletka: ${argv.join(' ')} failed: ${e.message}`);
+            this._log(`${argv.join(' ')} failed: ${e.message}`);
         }
     }
 
     async restart() {
+        const epoch = this._epoch;
         await this._run(['systemctl', '--user', 'try-restart', 'xdg-desktop-portal-gnome.service']);
         for (const [appId, argv] of QUIT_WHEN_HIDDEN)
-            await this._quitSafely(appId, argv);
+            await this._quitSafely(appId, argv, epoch);
     }
 
     // The app's background service outlives its windows and keeps the old
     // gtk.css. Quit it once it has no windows and is not copying files
     // (quitting Nautilus aborts running file operations).
-    async _quitSafely(appId, argv) {
+    async _quitSafely(appId, argv, epoch) {
         if (this._pending.has(appId))
             return;
-        const epoch = this._epoch;
         const attempt = async () => {
             this._pending.delete(appId);
             if (epoch !== this._epoch)
@@ -110,9 +113,12 @@ export class Services {
 
     // User-requested restart of Files that reopens its windows (first tab each).
     async restartFiles() {
+        const epoch = this._epoch;
         if (await this._isBusy(NAUTILUS))
             return {ok: false, reason: 'busy'};
         const windows = await this._getWindowLocations();
+        if (epoch !== this._epoch)
+            return {ok: false, reason: 'cancelled'};
         this._pending.get(NAUTILUS)?.();
         this._pending.delete(NAUTILUS);
         await this._run(['nautilus', '--quit']);
@@ -146,5 +152,11 @@ export class Services {
         for (const cancel of this._pending.values())
             cancel();
         this._pending.clear();
+    }
+
+    // After this nothing is spawned, watched or scheduled any more.
+    destroy() {
+        this._destroyed = true;
+        this.cancelPending();
     }
 }

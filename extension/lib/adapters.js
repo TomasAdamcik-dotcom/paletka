@@ -151,8 +151,6 @@ export class GioSettingsAdapter {
 
     // Releases cached Gio.Settings objects (call from disable()).
     destroy() {
-        for (const s of this._cache.values())
-            s.run_dispose();
         this._cache.clear();
     }
 }

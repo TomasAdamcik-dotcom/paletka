@@ -86,6 +86,8 @@ export default class PaletkaExtension extends Extension {
         });
         this._queue = Promise.resolve();
         this._sleepIds = new Set();
+        this._cancellable = new Gio.Cancellable();
+        this._noticeSource = null;
         // Families whose missing VS Code theme was already suggested this session.
         this._vscodeSuggested = new Set();
         this._stylesheet = null;
@@ -121,11 +123,16 @@ export default class PaletkaExtension extends Extension {
         }
         this._stopMonitor?.();
         this._stopMonitor = null;
-        this._services?.cancelPending();
+        this._services?.destroy();
         this._services = null;
         for (const id of this._sleepIds ?? [])
             GLib.source_remove(id);
         this._sleepIds = null;
+        this._cancellable?.cancel();
+        this._cancellable = null;
+        // Its "Install theme" button must not outlive the extension.
+        this._noticeSource?.destroy();
+        this._noticeSource = null;
         this._vscodeSuggested = null;
         Main.sessionMode.disconnectObject(this);
         this._settings?.disconnectObject(this);
@@ -318,6 +325,10 @@ export default class PaletkaExtension extends Extension {
 
     _sleep(ms) {
         return new Promise(resolve => {
+            if (!this._sleepIds) {
+                resolve();
+                return;
+            }
             const id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ms, () => {
                 this._sleepIds?.delete(id);
                 resolve();
@@ -335,7 +346,7 @@ export default class PaletkaExtension extends Extension {
         try {
             const reply = await Gio.DBus.session.call('org.freedesktop.DBus', '/org/freedesktop/DBus',
                 'org.freedesktop.DBus', 'GetConnectionUnixProcessID', new GLib.Variant('(s)', [name]),
-                new GLib.VariantType('(u)'), Gio.DBusCallFlags.NONE, 1000, null);
+                new GLib.VariantType('(u)'), Gio.DBusCallFlags.NONE, 1000, this._cancellable);
             return [reply.deepUnpack()[0]];
         } catch {
             return [];
@@ -373,7 +384,7 @@ export default class PaletkaExtension extends Extension {
             const reply = await Gio.DBus.session.call('org.gnome.Nautilus', '/org/freedesktop/FileManager1',
                 'org.freedesktop.DBus.Properties', 'Get',
                 new GLib.Variant('(ss)', ['org.freedesktop.FileManager1', 'OpenWindowsWithLocations']),
-                new GLib.VariantType('(v)'), Gio.DBusCallFlags.NO_AUTO_START, 2000, null);
+                new GLib.VariantType('(v)'), Gio.DBusCallFlags.NO_AUTO_START, 2000, this._cancellable);
             return Object.values(reply.recursiveUnpack()[0]);
         } catch (e) {
             this._logger?.warn(`cannot read Files windows: ${e.message}`);
@@ -432,14 +443,30 @@ export default class PaletkaExtension extends Extension {
         if (this._vscodeSuggested.has(family))
             return;
         this._vscodeSuggested.add(family);
-        const source = MessageTray.getSystemSource();
+        const source = this._noticeSourceFor();
         const notification = new MessageTray.Notification({
             source,
             title: fmt(_('VS Code theme for %s is not installed'), name),
             body: _('Install it so VS Code switches together with the desktop theme.'),
         });
-        notification.addAction(_('Install theme'), () => this._installVscodeThemes(extensions));
+        const generation = this._generation;
+        notification.addAction(_('Install theme'), () => {
+            if (this._alive(generation))
+                this._installVscodeThemes(extensions);
+        });
         this._showFor(source, notification, VSCODE_NOTICE_MS);
+    }
+
+    _noticeSourceFor() {
+        if (!this._noticeSource) {
+            this._noticeSource = new MessageTray.Source({
+                title: _('Paletka'),
+                iconName: 'applications-graphics-symbolic',
+            });
+            this._noticeSource.connect('destroy', () => (this._noticeSource = null));
+            Main.messageTray.add(this._noticeSource);
+        }
+        return this._noticeSource;
     }
 
     async _installVscodeThemes(extensions) {

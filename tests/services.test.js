@@ -237,3 +237,44 @@ test('services: restartFilesWhenIdle leaves closed Files to the normal quit', as
     await h.fire();
     assertEq(h.calls.some(c => c.includes('--new-window')), false);
 });
+
+test('services: nothing runs or is watched after destroy during a restart', async () => {
+    const calls = [];
+    const watchers = new Map();
+    let releasePortal;
+    const services = new Services({
+        spawn: argv => {
+            calls.push(argv.join(' '));
+            return argv[0] === 'systemctl' ? new Promise(r => (releasePortal = r)) : Promise.resolve();
+        },
+        hasWindows: id => id === NAUTILUS,
+        whenHidden: (id, cb) => {
+            watchers.set(id, cb);
+            return () => watchers.delete(id);
+        },
+        log: () => {},
+    });
+    const done = services.restart();
+    services.destroy();
+    releasePortal();
+    await done;
+    assertEq(calls, ['systemctl --user try-restart xdg-desktop-portal-gnome.service']);
+    assertEq(watchers.size, 0);
+});
+
+test('services: restartFiles stops when destroyed during the busy check', async () => {
+    const calls = [];
+    let services;
+    services = new Services({
+        spawn: async argv => calls.push(argv.join(' ')),
+        hasWindows: () => true,
+        isBusy: async () => {
+            services.destroy();
+            return false;
+        },
+        getWindowLocations: async () => [['file:///home/u/a']],
+        log: () => {},
+    });
+    assertEq((await services.restartFiles()).ok, false);
+    assertEq(calls, []);
+});
