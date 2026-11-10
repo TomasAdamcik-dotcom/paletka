@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "id": "nord",
+  "name": "Nord",
+  "kind": "custom",
+  "light": {
+    "base": {
+      "background": "#eceff4",
+      "foreground": "#2e3440",
+      "accent": "#5e81ac",
+      "surface": "#e5e9f0",
+      "success": "#a3be8c",
+      "error": "#bf616a"
+    },
+    "overrides": {},
+    "terminal": {
+      "foreground": "#2e3440",
+      "background": "#eceff4",
+      "cursor": "#2e3440",
+      "palette": [
+        "#3b4252",
+        "#bf616a",
+        "#a3be8c",
+        "#d08770",
+        "#5e81ac",
+        "#b48ead",
+        "#88c0d0",
+        "#d8dee9",
+        "#4c566a",
+        "#bf616a",
+        "#a3be8c",
+        "#d08770",
+        "#5e81ac",
+        "#b48ead",
+        "#8fbcbb",
+        "#e5e9f0"
+      ]
+    },
+    "wallpaper": {
+      "type": "gradient",
+      "from": "#eceff4",
+      "to": "#d8dee9"
+    },
+    "iconTheme": "Yaru",
+    "vscodeTheme": null,
+    "vscodeExtension": null
+  },
+  "dark": {
+    "base": {
+      "background": "#2e3440",
+      "foreground": "#d8dee9",
+      "accent": "#88c0d0",
+      "surface": "#3b4252",
+      "success": "#a3be8c",
+      "error": "#bf616a"
+    },
+    "overrides": {},
+    "terminal": {
+      "foreground": "#d8dee9",
+      "background": "#2e3440",
+      "cursor": "#d8dee9",
+      "palette": [
+        "#3b4252",
+        "#bf616a",
+        "#a3be8c",
+        "#ebcb8b",
+        "#81a1c1",
+        "#b48ead",
+        "#88c0d0",
+        "#e5e9f0",
+        "#4c566a",
+        "#bf616a",
+        "#a3be8c",
+        "#ebcb8b",
+        "#81a1c1",
+        "#b48ead",
+        "#8fbcbb",
+        "#eceff4"
+      ]
+    },
+    "wallpaper": {
+      "type": "gradient",
+      "from": "#2e3440",
+      "to": "#3b4252"
+    },
+    "iconTheme": "Yaru-dark",
+    "vscodeTheme": "Nord",
+    "vscodeExtension": "arcticicestudio.nord-visual-studio-code"
+  }
+}

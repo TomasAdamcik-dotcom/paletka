@@ -1,0 +1,20 @@
+/* Paletka: one row per theme with a Dark and a Light button. */
+.paletka-row {
+  spacing: 12px;
+}
+
+.paletka-variants {
+  spacing: 4px;
+}
+
+.paletka-variant {
+  min-width: 64px;
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+
+.quick-toggle-menu .button.paletka-variant-active,
+.quick-toggle-menu .button.paletka-variant-active:hover {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}

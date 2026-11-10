@@ -1,0 +1,6 @@
+{
+  "uuid": "helper@paletka.test",
+  "name": "Paletka E2E helper",
+  "description": "Test-only: enables unsafe mode so the E2E scenario can use Eval and Screenshot.",
+  "shell-version": ["50"]
+}

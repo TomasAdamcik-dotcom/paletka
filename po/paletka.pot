@@ -1,0 +1,373 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: paletka 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-10 13:41+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: extension/extension.js:229
+msgid "Paletka"
+msgstr ""
+
+#: extension/extension.js:284
+msgid "Theme changed"
+msgstr ""
+
+#: extension/extension.js:284
+msgid "Open apps will use the new colors after they are reopened."
+msgstr ""
+
+#: extension/extension.js:378
+msgid "Old color settings found"
+msgstr ""
+
+#: extension/extension.js:379
+#, javascript-format
+msgid ""
+"%s pins light colors with the old @define-color syntax. Apps may be "
+"unreadable in dark mode when you switch back to Ubuntu. Move or delete that "
+"file if you see this."
+msgstr ""
+
+#: extension/extension.js:410
+#, javascript-format
+msgid "VS Code theme for %s is not installed"
+msgstr ""
+
+#: extension/extension.js:411
+msgid "Install it so VS Code switches together with the desktop theme."
+msgstr ""
+
+#: extension/extension.js:413
+msgid "Install theme"
+msgstr ""
+
+#: extension/extension.js:423
+msgid "VS Code theme was not installed"
+msgstr ""
+
+#: extension/extension.js:424
+msgid "The VS Code command line (code) was not found."
+msgstr ""
+
+#: extension/extension.js:427
+msgid "VS Code theme installed"
+msgstr ""
+
+#: extension/extension.js:427
+msgid "VS Code now follows the desktop theme."
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:23
+#: extension/lib/prefs/familyEditorPage.js:189
+msgid "Background"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:24
+#: extension/lib/prefs/familyEditorPage.js:188
+msgid "Text"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:25
+msgid "Accent"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:26
+msgid "Panels and sidebars"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:27
+msgid "Success"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:28
+msgid "Error"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:48 extension/lib/toggle.js:63
+#: extension/lib/toggle.js:81
+msgid "Light"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:49 extension/lib/toggle.js:63
+#: extension/lib/toggle.js:81
+msgid "Dark"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:120
+msgid "Name"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:134
+msgid "Base colors"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:135
+msgid "Everything else is derived from these six colors."
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:148
+msgid "Advanced"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:150
+msgid "Derived colors"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:151
+msgid "Override any computed color"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:161
+msgid "Back to automatic"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:179
+#: extension/lib/prefs/familyListPage.js:82
+msgid "Custom"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:179
+msgid "Automatic"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:185
+msgid "Terminal"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:190
+msgid "Cursor"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:191
+msgid "Palette"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:191
+msgid "16 ANSI colors"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:193
+#, javascript-format
+msgid "Color %d"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:196
+msgid "Reset from base colors"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:203
+msgid "Wallpaper"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:206
+msgid "Keep current wallpaper"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:206
+msgid "Solid color"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:206
+msgid "Gradient"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:206
+msgid "Image file"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:207
+msgid "Type"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:223
+msgid "Color"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:225
+msgid "From"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:226
+msgid "To"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:229
+msgid "Image"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:229
+msgid "None selected"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:230
+msgid "Choose…"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:242
+msgid "Images"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:244
+msgid "Choose Wallpaper"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:257
+msgid "Icons"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:263
+msgid "Keep current icons"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:264
+msgid "Icon theme"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:280
+msgid "VS Code"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:281
+msgid "VS Code switches to this color theme together with the desktop."
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:287
+msgid "Keep current VS Code theme"
+msgstr ""
+
+#: extension/lib/prefs/familyEditorPage.js:288
+msgid "Color theme"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:16
+#: extension/lib/prefs/familyListPage.js:25
+msgid "Themes"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:26
+msgid "Pick a theme here or in the Theme tile of Quick Settings."
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:29
+msgid "New Theme"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:31
+msgid "Import…"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:39
+msgid "Restore"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:40
+msgid ""
+"Switch back to your original Ubuntu look. Do this before uninstalling the "
+"extension."
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:42
+msgid "Restore Ubuntu Defaults"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:82
+msgid "Built-in"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:84
+msgid "Your original look"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:91
+msgid "Apply"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:93
+msgid "Edit"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:94
+msgid "Duplicate"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:96
+msgid "Export…"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:98
+#: extension/lib/prefs/familyListPage.js:138
+msgid "Delete"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:119
+#, javascript-format
+msgid "%s (copy)"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:126
+msgid "My Theme"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:134
+#, javascript-format
+msgid "Delete “%s”?"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:135
+msgid "This theme will be removed permanently."
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:137
+msgid "Cancel"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:152
+msgid "Theme files (JSON)"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:158
+msgid "Export Theme"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:168
+msgid "Theme exported"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:178
+msgid "Import Theme"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:189
+#, javascript-format
+msgid "Imported “%s”"
+msgstr ""
+
+#: extension/lib/prefs/familyListPage.js:191
+#, javascript-format
+msgid "Cannot import: %s"
+msgstr ""
+
+#: extension/lib/toggle.js:23 extension/lib/toggle.js:31
+msgid "Theme"
+msgstr ""
+
+#: extension/lib/toggle.js:26
+msgid "Open theme menu"
+msgstr ""
+
+#: extension/lib/toggle.js:35
+msgid "Edit Themes…"
+msgstr ""

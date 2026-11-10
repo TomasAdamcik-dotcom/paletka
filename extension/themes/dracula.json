@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "id": "dracula",
+  "name": "Dracula",
+  "kind": "custom",
+  "light": {
+    "base": {
+      "background": "#fffbeb",
+      "foreground": "#1f1f1f",
+      "accent": "#644ac9",
+      "surface": "#efe9d1",
+      "success": "#14710a",
+      "error": "#cb3a2a"
+    },
+    "overrides": {},
+    "terminal": {
+      "foreground": "#1f1f1f",
+      "background": "#fffbeb",
+      "cursor": "#1f1f1f",
+      "palette": [
+        "#1f1f1f",
+        "#cb3a2a",
+        "#14710a",
+        "#846e15",
+        "#644ac9",
+        "#a3144d",
+        "#036a96",
+        "#cfcfde",
+        "#6c664b",
+        "#cb3a2a",
+        "#14710a",
+        "#846e15",
+        "#644ac9",
+        "#a3144d",
+        "#036a96",
+        "#fffbeb"
+      ]
+    },
+    "wallpaper": {
+      "type": "gradient",
+      "from": "#fffbeb",
+      "to": "#efe9d1"
+    },
+    "iconTheme": "Yaru",
+    "vscodeTheme": null,
+    "vscodeExtension": null
+  },
+  "dark": {
+    "base": {
+      "background": "#282a36",
+      "foreground": "#f8f8f2",
+      "accent": "#bd93f9",
+      "surface": "#21222c",
+      "success": "#50fa7b",
+      "error": "#ff5555"
+    },
+    "overrides": {},
+    "terminal": {
+      "foreground": "#f8f8f2",
+      "background": "#282a36",
+      "cursor": "#f8f8f2",
+      "palette": [
+        "#21222c",
+        "#ff5555",
+        "#50fa7b",
+        "#f1fa8c",
+        "#bd93f9",
+        "#ff79c6",
+        "#8be9fd",
+        "#f8f8f2",
+        "#6272a4",
+        "#ff6e6e",
+        "#69ff94",
+        "#ffffa5",
+        "#d6acff",
+        "#ff92df",
+        "#a4ffff",
+        "#ffffff"
+      ]
+    },
+    "wallpaper": {
+      "type": "gradient",
+      "from": "#282a36",
+      "to": "#21222c"
+    },
+    "iconTheme": "Yaru-dark",
+    "vscodeTheme": "Dracula Theme",
+    "vscodeExtension": "dracula-theme.theme-dracula"
+  }
+}

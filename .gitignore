@@ -1,0 +1,4 @@
+dist/
+extension/schemas/gschemas.compiled
+tests/e2e/out/
+.superpowers/

@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "id": "solarized",
+  "name": "Solarized",
+  "kind": "custom",
+  "light": {
+    "base": {
+      "background": "#fdf6e3",
+      "foreground": "#586e75",
+      "accent": "#268bd2",
+      "surface": "#eee8d5",
+      "success": "#859900",
+      "error": "#dc322f"
+    },
+    "overrides": {},
+    "terminal": {
+      "foreground": "#657b83",
+      "background": "#fdf6e3",
+      "cursor": "#657b83",
+      "palette": [
+        "#073642",
+        "#dc322f",
+        "#859900",
+        "#b58900",
+        "#268bd2",
+        "#d33682",
+        "#2aa198",
+        "#eee8d5",
+        "#002b36",
+        "#cb4b16",
+        "#586e75",
+        "#657b83",
+        "#839496",
+        "#6c71c4",
+        "#93a1a1",
+        "#fdf6e3"
+      ]
+    },
+    "wallpaper": {
+      "type": "gradient",
+      "from": "#fdf6e3",
+      "to": "#eee8d5"
+    },
+    "iconTheme": "Yaru",
+    "vscodeTheme": "Solarized Light",
+    "vscodeExtension": null
+  },
+  "dark": {
+    "base": {
+      "background": "#002b36",
+      "foreground": "#839496",
+      "accent": "#268bd2",
+      "surface": "#073642",
+      "success": "#859900",
+      "error": "#dc322f"
+    },
+    "overrides": {},
+    "terminal": {
+      "foreground": "#839496",
+      "background": "#002b36",
+      "cursor": "#839496",
+      "palette": [
+        "#073642",
+        "#dc322f",
+        "#859900",
+        "#b58900",
+        "#268bd2",
+        "#d33682",
+        "#2aa198",
+        "#eee8d5",
+        "#002b36",
+        "#cb4b16",
+        "#586e75",
+        "#657b83",
+        "#839496",
+        "#6c71c4",
+        "#93a1a1",
+        "#fdf6e3"
+      ]
+    },
+    "wallpaper": {
+      "type": "gradient",
+      "from": "#002b36",
+      "to": "#073642"
+    },
+    "iconTheme": "Yaru-dark",
+    "vscodeTheme": "Solarized Dark",
+    "vscodeExtension": null
+  }
+}

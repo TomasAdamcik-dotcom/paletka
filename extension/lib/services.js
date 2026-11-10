@@ -1,0 +1,150 @@
+// Restarts long-running background GTK processes so they pick up a new gtk.css.
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+
+export function defaultSpawn(argv) {
+    return new Promise((resolve, reject) => {
+        try {
+            const proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE);
+            proc.wait_async(null, (p, res) => {
+                try {
+                    p.wait_finish(res);
+                    resolve();
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
+
+function defaultLater(ms, cb) {
+    const id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ms, () => {
+        cb();
+        return GLib.SOURCE_REMOVE;
+    });
+    return () => GLib.source_remove(id);
+}
+
+const QUIT_WHEN_HIDDEN = [
+    ['org.gnome.Nautilus.desktop', ['nautilus', '--quit']],
+    ['org.gnome.Software.desktop', ['gnome-software', '--quit']],
+];
+
+const NAUTILUS = 'org.gnome.Nautilus.desktop';
+const RETRY_MS = 30000;
+const FILES_RESTART = 'files-restart';
+
+export class Services {
+    // whenHidden(appId, cb) calls cb once the app has no windows left and
+    // returns a function that cancels the watch.
+    // isBusy(appId) resolves true while the app is doing file I/O.
+    // later(ms, cb) schedules cb and returns a cancel function.
+    // getWindowLocations() resolves Nautilus' open windows as arrays of URIs.
+    // waitUntilStopped(appId) resolves once the app's process has exited.
+    constructor({
+        spawn = defaultSpawn, hasWindows, whenHidden = null, isBusy = async () => false,
+        later = defaultLater, getWindowLocations = async () => [], waitUntilStopped = async () => true,
+        log = console.warn,
+    }) {
+        this._spawn = spawn;
+        this._hasWindows = hasWindows;
+        this._whenHidden = whenHidden;
+        this._isBusy = isBusy;
+        this._later = later;
+        this._getWindowLocations = getWindowLocations;
+        this._waitUntilStopped = waitUntilStopped;
+        this._log = log;
+        this._pending = new Map();
+        this._epoch = 0;
+    }
+
+    async _run(argv) {
+        try {
+            await this._spawn(argv);
+        } catch (e) {
+            this._log(`Paletka: ${argv.join(' ')} failed: ${e.message}`);
+        }
+    }
+
+    async restart() {
+        await this._run(['systemctl', '--user', 'try-restart', 'xdg-desktop-portal-gnome.service']);
+        for (const [appId, argv] of QUIT_WHEN_HIDDEN)
+            await this._quitSafely(appId, argv);
+    }
+
+    // The app's background service outlives its windows and keeps the old
+    // gtk.css. Quit it once it has no windows and is not copying files
+    // (quitting Nautilus aborts running file operations).
+    async _quitSafely(appId, argv) {
+        if (this._pending.has(appId))
+            return;
+        const epoch = this._epoch;
+        const attempt = async () => {
+            this._pending.delete(appId);
+            if (epoch !== this._epoch)
+                return;
+            if (this._hasWindows(appId)) {
+                if (this._whenHidden)
+                    this._pending.set(appId, this._whenHidden(appId, attempt));
+                return;
+            }
+            if (await this._isBusy(appId)) {
+                if (epoch === this._epoch)
+                    this._pending.set(appId, this._later(RETRY_MS, attempt));
+                return;
+            }
+            if (epoch !== this._epoch)
+                return;
+            // The check takes a few seconds; the user may have reopened it meanwhile.
+            if (this._hasWindows(appId)) {
+                await attempt();
+                return;
+            }
+            await this._run(argv);
+        };
+        await attempt();
+    }
+
+    // User-requested restart of Files that reopens its windows (first tab each).
+    async restartFiles() {
+        if (await this._isBusy(NAUTILUS))
+            return {ok: false, reason: 'busy'};
+        const windows = await this._getWindowLocations();
+        this._pending.get(NAUTILUS)?.();
+        this._pending.delete(NAUTILUS);
+        await this._run(['nautilus', '--quit']);
+        await this._waitUntilStopped(NAUTILUS);
+        for (const uris of windows) {
+            if (uris.length)
+                await this._run(['nautilus', '--new-window', uris[0]]);
+        }
+        return {ok: true};
+    }
+
+    // Restart open Files so its windows pick up the new theme; while it is
+    // copying, try again later. Closed Files is left to the normal quit.
+    async restartFilesWhenIdle() {
+        this._pending.get(FILES_RESTART)?.();
+        this._pending.delete(FILES_RESTART);
+        const epoch = this._epoch;
+        const attempt = async () => {
+            this._pending.delete(FILES_RESTART);
+            if (epoch !== this._epoch || !this._hasWindows(NAUTILUS))
+                return;
+            const result = await this.restartFiles();
+            if (!result.ok && epoch === this._epoch)
+                this._pending.set(FILES_RESTART, this._later(RETRY_MS, attempt));
+        };
+        await attempt();
+    }
+
+    cancelPending() {
+        this._epoch++;
+        for (const cancel of this._pending.values())
+            cancel();
+        this._pending.clear();
+    }
+}

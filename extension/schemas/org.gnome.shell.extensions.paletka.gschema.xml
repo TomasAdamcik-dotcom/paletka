@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="paletka">
+  <schema id="org.gnome.shell.extensions.paletka" path="/org/gnome/shell/extensions/paletka/">
+    <key name="active-family" type="s">
+      <default>'ubuntu'</default>
+      <summary>Active theme family id</summary>
+    </key>
+    <key name="last-custom-family" type="s">
+      <default>'solarized'</default>
+      <summary>Theme family the tile switches to when turned on</summary>
+    </key>
+    <key name="restart-background-services" type="b">
+      <default>true</default>
+      <summary>Restart background GTK services after switching theme families</summary>
+    </key>
+  </schema>
+</schemalist>

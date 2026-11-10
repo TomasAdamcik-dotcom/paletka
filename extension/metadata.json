@@ -1,0 +1,11 @@
+{
+  "uuid": "paletka@adamciktomas.github.io",
+  "name": "Paletka",
+  "description": "Switch whole-desktop color themes (shell, apps, terminal, wallpaper, icons) from Quick Settings, and create your own in a built-in editor. Ships Ubuntu, Solarized, Gruvbox, Nord and Dracula.",
+  "shell-version": ["50"],
+  "session-modes": ["user", "unlock-dialog"],
+  "settings-schema": "org.gnome.shell.extensions.paletka",
+  "gettext-domain": "paletka",
+  "url": "https://github.com/TomasAdamcik-dotcom/paletka",
+  "version-name": "1.0.0"
+}
