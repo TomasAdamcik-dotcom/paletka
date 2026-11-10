@@ -44,10 +44,11 @@ export class Services {
     // later(ms, cb) schedules cb and returns a cancel function.
     // getWindowLocations() resolves Nautilus' open windows as arrays of URIs.
     // waitUntilStopped(appId) resolves once the app's process has exited.
+    // openFolder(uri) opens a new Files window at uri.
     constructor({
         spawn = defaultSpawn, hasWindows, whenHidden = null, isBusy = async () => false,
         later = defaultLater, getWindowLocations = async () => [], waitUntilStopped = async () => true,
-        log = console.warn,
+        openFolder = async () => {}, log = console.warn,
     }) {
         this._spawn = spawn;
         this._hasWindows = hasWindows;
@@ -56,6 +57,7 @@ export class Services {
         this._later = later;
         this._getWindowLocations = getWindowLocations;
         this._waitUntilStopped = waitUntilStopped;
+        this._openFolder = openFolder;
         this._log = log;
         this._pending = new Map();
         this._epoch = 0;
@@ -123,9 +125,16 @@ export class Services {
         this._pending.delete(NAUTILUS);
         await this._run(['nautilus', '--quit']);
         await this._waitUntilStopped(NAUTILUS);
+        // Not `nautilus --new-window`: the first one becomes the new Files
+        // process and never exits, so the next windows would never open.
         for (const uris of windows) {
-            if (uris.length)
-                await this._run(['nautilus', '--new-window', uris[0]]);
+            if (uris.length && !this._destroyed) {
+                try {
+                    await this._openFolder(uris[0]);
+                } catch (e) {
+                    this._log(`cannot reopen ${uris[0]}: ${e.message}`);
+                }
+            }
         }
         return {ok: true};
     }

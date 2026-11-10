@@ -372,17 +372,21 @@ function filesWindows() {
 
 const HOME = GLib.get_home_dir();
 
-step('7c. Files restarts by itself and reopens its window with the new theme', () => {
+step('7c. Files restarts by itself and reopens its windows with the new theme', () => {
     ext.set_boolean('restart-background-services', true);
-    GLib.spawn_command_line_async(`env WAYLAND_DISPLAY=wayland-0 nautilus --new-window file://${HOME}/Documents`);
-    waitFor('Files window', () => filesWindows().some(w => w[0]?.endsWith('/Documents')), 15000);
+    GLib.mkdir_with_parents(`${HOME}/Music`, 0o755);
+    for (const dir of ['Documents', 'Music']) {
+        GLib.spawn_command_line_async(`env WAYLAND_DISPLAY=wayland-0 nautilus --new-window file://${HOME}/${dir}`);
+        waitFor(`Files window ${dir}`, () => filesWindows().some(w => w[0]?.endsWith(`/${dir}`)), 15000);
+    }
     const before = nautilusPids();
     selectFamily('Gruvbox');
     waitFor('Files restarted', () => {
         const now = nautilusPids();
         return now.length > 0 && !now.some(p => before.includes(p));
     }, 20000);
-    waitFor('window reopened', () => filesWindows().some(w => w[0]?.endsWith('/Documents')), 15000);
+    for (const dir of ['Documents', 'Music'])
+        waitFor(`window ${dir} reopened`, () => filesWindows().some(w => w[0]?.endsWith(`/${dir}`)), 15000);
     const titles = evalShell(`Main.messageTray.getSources().flatMap(s => s.notifications.map(n => n.title))`);
     assert(!titles.some(t => t.includes('Files')), `no Files notification: ${titles}`);
     assert(read(`${HOME}/systemctl-calls.log`)?.includes('try-restart xdg-desktop-portal-gnome.service'),

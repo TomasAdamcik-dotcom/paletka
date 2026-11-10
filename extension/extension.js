@@ -73,6 +73,7 @@ export default class PaletkaExtension extends Extension {
             isBusy: id => this._isBusy(id),
             getWindowLocations: () => this._filesWindowLocations(),
             waitUntilStopped: id => this._waitUntilStopped(id),
+            openFolder: uri => this._openFilesWindow(uri),
             log,
         });
         this._applier = new Applier({
@@ -384,6 +385,13 @@ export default class PaletkaExtension extends Extension {
             await this._sleep(100);
         }
         return false;
+    }
+
+    // D-Bus activation starts Files as its own service, outside the shell.
+    async _openFilesWindow(uri) {
+        await Gio.DBus.session.call('org.freedesktop.FileManager1', '/org/freedesktop/FileManager1',
+            'org.freedesktop.FileManager1', 'ShowFolders', new GLib.Variant('(ass)', [[uri], '']),
+            null, Gio.DBusCallFlags.NONE, 10000, this._cancellable);
     }
 
     // Open Files windows as arrays of URIs (org.freedesktop.FileManager1).

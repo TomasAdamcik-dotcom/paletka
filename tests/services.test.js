@@ -97,6 +97,7 @@ function busyHarness({busy = false, windows = []} = {}) {
         },
         getWindowLocations: async () => [['file:///home/u/a', 'file:///home/u/b'], ['file:///home/u/c']],
         waitUntilStopped: async () => true,
+        openFolder: async uri => calls.push(`open ${uri}`),
         log: () => {},
     });
     // Runs every timer that is due now (timers scheduled meanwhile wait).
@@ -173,8 +174,8 @@ test('services: restartFiles quits and reopens each window at its first location
     assertEq(await h.services.restartFiles(), {ok: true});
     assertEq(h.calls.slice(-3), [
         'nautilus --quit',
-        'nautilus --new-window file:///home/u/a',
-        'nautilus --new-window file:///home/u/c',
+        'open file:///home/u/a',
+        'open file:///home/u/c',
     ]);
     assertEq(h.watchers.has(NAUTILUS), false);
 });
@@ -214,8 +215,8 @@ test('services: restartFilesWhenIdle restarts open Files right away when idle', 
     await h.services.restartFilesWhenIdle();
     assertEq(h.calls.slice(-3), [
         'nautilus --quit',
-        'nautilus --new-window file:///home/u/a',
-        'nautilus --new-window file:///home/u/c',
+        'open file:///home/u/a',
+        'open file:///home/u/c',
     ]);
 });
 
@@ -226,7 +227,7 @@ test('services: restartFilesWhenIdle waits for a copy to finish, then restarts',
     h.state.busy = false;
     await h.fire();
     assertEq(quits(h.calls), 1);
-    assertEq(h.calls.at(-1), 'nautilus --new-window file:///home/u/c');
+    assertEq(h.calls.at(-1), 'open file:///home/u/c');
 });
 
 test('services: restartFilesWhenIdle leaves closed Files to the normal quit', async () => {
@@ -235,7 +236,7 @@ test('services: restartFilesWhenIdle leaves closed Files to the normal quit', as
     h.open.delete(NAUTILUS);
     h.state.busy = false;
     await h.fire();
-    assertEq(h.calls.some(c => c.includes('--new-window')), false);
+    assertEq(h.calls.some(c => c.startsWith('open ')), false);
 });
 
 test('services: nothing runs or is watched after destroy during a restart', async () => {
