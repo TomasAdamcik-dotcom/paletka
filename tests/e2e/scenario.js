@@ -107,7 +107,10 @@ function probeColor() {
 }
 
 // Shell-side helpers evaluated with Main in scope.
+// Each theme row ends with its Dark and Light buttons, named "<theme> Dark|Light".
 const FIND_TOGGLE = `
+    const buttonsOf = i => i.get_children().at(-1).get_children();
+    const nameOf = i => buttonsOf(i)[0].accessible_name.replace(/ Dark$/, '');
     const qs = Main.panel.statusArea.quickSettings;
     const kids = qs.menu._grid.get_children();
     const toggles = kids.filter(k => k.constructor.name.includes('ThemeToggle'));
@@ -119,7 +122,7 @@ function toggleInfo() {
         const dark = qs._darkMode.quickSettingsItems[0];
         return {count: toggles.length, index: kids.indexOf(toggle), darkIndex: kids.indexOf(dark),
             subtitle: toggle?.subtitle ?? null, checked: toggle?.checked ?? null,
-            items: toggle ? toggle._section._getMenuItems().map(i => i._paletkaName) : []};
+            items: toggle ? toggle._section._getMenuItems().map(nameOf) : []};
     })()`);
 }
 
@@ -134,17 +137,16 @@ function ourStylesheets() {
 // Clicks the Dark or Light button of a theme row (default: the current scheme).
 function selectFamily(name, dark = iface.get_string('color-scheme') === 'prefer-dark') {
     evalShell(`(() => {${FIND_TOGGLE}
-        const item = toggle._section._getMenuItems().find(i => i._paletkaName === ${JSON.stringify(name)});
-        const buttons = item.get_children().at(-1).get_children();
-        buttons.find(b => b._paletka.dark === ${dark}).emit('clicked', 1);
+        const item = toggle._section._getMenuItems().find(i => nameOf(i) === ${JSON.stringify(name)});
+        buttonsOf(item)[${dark} ? 0 : 1].emit('clicked', 1);
         return true;
     })()`);
 }
 
 function activeButtons() {
     return evalShell(`(() => {${FIND_TOGGLE}
-        return toggle._section._getMenuItems().flatMap(i => i.get_children().at(-1).get_children()
-            .filter(b => b._paletka.active).map(b => i._paletkaName + ' ' + b.label));
+        return toggle._section._getMenuItems().flatMap(i => buttonsOf(i)
+            .filter(b => b.has_style_class_name('paletka-variant-active')).map(b => nameOf(i) + ' ' + b.label));
     })()`);
 }
 

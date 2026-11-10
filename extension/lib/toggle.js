@@ -68,13 +68,10 @@ export const ThemeToggle = GObject.registerClass({
                     style_class: `button paletka-variant${active ? ' paletka-variant-active' : ''}`,
                     accessible_name: `${family.name} ${label}`,
                 });
-                button._paletka = {id: family.id, dark, active};
                 button.connect('clicked', () => this.emit('variant-selected', family.id, dark));
                 variants.add_child(button);
             }
             item.add_child(variants);
-            item._paletkaId = family.id;
-            item._paletkaName = family.name;
             this._section.addMenuItem(item);
         }
         const active = families.find(f => f.id === activeId);
