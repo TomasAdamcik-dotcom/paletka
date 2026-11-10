@@ -26,3 +26,33 @@ test('backup: restore only touches keys still holding our value', () => {
     assertEq(settings.get(accent), 'teal');
     assertEq(backup.has(), false);
 });
+
+test('backup: recording an unchanged value does not rewrite the state file', () => {
+    const {backup, fs, paths} = setup();
+    backup.snapshot([ref], []);
+    backup.recordWritten(ref, 'adw-gtk3');
+    const state = `${paths.backupDir}/state.json`;
+    let writes = 0;
+    const writeText = fs.writeText.bind(fs);
+    fs.writeText = (path, text) => {
+        if (path === state)
+            writes++;
+        writeText(path, text);
+    };
+    backup.recordWritten(ref, 'adw-gtk3');
+    assertEq(writes, 0);
+    backup.recordWritten(ref, 'Yaru');
+    assertEq(writes, 1);
+});
+
+test('backup: a new snapshot after clear starts from an empty state', () => {
+    const {backup, settings} = setup();
+    backup.snapshot([ref], []);
+    backup.recordWritten(ref, 'adw-gtk3');
+    backup.clear();
+    assertEq(backup.state(), null);
+    settings.set(ref, 'Other');
+    backup.snapshot([ref], []);
+    assertEq(backup.original(ref), 'Other');
+    assertEq(backup.state().written, {});
+});

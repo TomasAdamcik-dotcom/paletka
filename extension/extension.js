@@ -100,7 +100,11 @@ export default class PaletkaExtension extends Extension {
             this._refreshToggle();
             this._scheduleVariant();
         }, this);
-        this._stopMonitor = this._store.monitor(id => this._onThemesChanged(id));
+        this._familiesCache = null;
+        this._stopMonitor = this._store.monitor(id => {
+            this._familiesCache = null;
+            this._onThemesChanged(id);
+        });
         Main.sessionMode.connectObject('updated', () => this._syncLocked(), this);
         this._syncLocked();
 
@@ -149,6 +153,7 @@ export default class PaletkaExtension extends Extension {
         this._iface = null;
         this._settings = null;
         this._store = null;
+        this._familiesCache = null;
         this._applier = null;
         this._fs = null;
         this._queue = null;
@@ -209,8 +214,10 @@ export default class PaletkaExtension extends Extension {
         return this._iface.get_string('color-scheme') === 'prefer-dark';
     }
 
+    // Theme files change only through the store's directory monitor.
     _families() {
-        return this._store.loadAll();
+        this._familiesCache ??= this._store.loadAll();
+        return this._familiesCache;
     }
 
     _activeFamily(families = this._families()) {

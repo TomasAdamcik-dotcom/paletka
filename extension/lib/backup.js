@@ -28,12 +28,17 @@ export class Backup {
         return this._fs.exists(this._statePath);
     }
 
+    // Only this extension writes the state file, so it is read once and kept.
     state() {
-        const text = this._fs.readText(this._statePath);
-        return text ? JSON.parse(text) : null;
+        if (this._state === undefined) {
+            const text = this._fs.readText(this._statePath);
+            this._state = text ? JSON.parse(text) : null;
+        }
+        return this._state;
     }
 
     _save(state) {
+        this._state = state;
         this._fs.writeText(this._statePath, JSON.stringify(state, null, 2));
     }
 
@@ -93,9 +98,10 @@ export class Backup {
 
     recordWritten(ref, value) {
         const state = this.state();
-        if (!state)
+        const key = keyOf(ref);
+        if (!state || (key in state.written && same(state.written[key], value)))
             return;
-        state.written[keyOf(ref)] = value;
+        state.written[key] = value;
         this._save(state);
     }
 
@@ -131,5 +137,6 @@ export class Backup {
 
     clear() {
         this._fs.removeTree(this._dir);
+        this._state = undefined;
     }
 }
