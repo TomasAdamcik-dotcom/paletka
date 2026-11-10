@@ -84,3 +84,10 @@ test('store: takenIds includes invalid files so they are never overwritten (I4)'
     assertEq(store.importFrom(`${d}/x.json`).id, 'my-theme-2');
     assertEq(fs.readText(`${userDir}/my-theme.json`), '{broken');
 });
+
+test('store: a user file claiming to be the system theme is skipped', () => {
+    const {store, userDir, logs} = makeStore();
+    fs.writeText(`${userDir}/fake.json`, JSON.stringify({version: 1, id: 'fake', name: 'Fake', kind: 'system'}));
+    assertEq(store.loadAll().map(f => f.id), BUILTINS);
+    assert(logs.some(l => l.includes('fake.json')), 'logged');
+});

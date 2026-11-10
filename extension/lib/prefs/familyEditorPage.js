@@ -10,7 +10,7 @@ import {gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions
 import {BASE_KEYS, DERIVED_KEYS, resolveVariant} from '../palette.js';
 import {
     setBaseColor, setOverride, clearOverride, setTerminalColor, resetTerminal,
-    setWallpaper, setIconTheme, setVscodeTheme, rename,
+    setWallpaper, setIconTheme, setVscodeTheme, rename, validateFamily,
 } from '../model.js';
 import {listIconThemes} from '../iconThemes.js';
 import {listVscodeThemes, VSCODE_EXTENSION_DIRS} from '../vscodeThemes.js';
@@ -120,9 +120,14 @@ class FamilyEditorPage extends Adw.NavigationPage {
         const name = new Adw.EntryRow({title: _('Name'), text: this._family.name});
         name.connect('changed', () => {
             const text = name.text.trim();
-            if (text) {
+            // Keep the last valid name rather than saving a theme that no longer loads.
+            const valid = text && validateFamily(rename(this._family, text)).ok;
+            if (valid) {
+                name.remove_css_class('error');
                 this.title = text;
                 this._update(rename(this._family, text));
+            } else {
+                name.add_css_class('error');
             }
         });
         group.add(name);

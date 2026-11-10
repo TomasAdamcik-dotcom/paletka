@@ -49,6 +49,8 @@ export class ThemeStore {
             const {family, error} = this._parse(`${this._userDir}/${name}`);
             if (error)
                 this._logOnce(`skipping ${name}: ${error}`);
+            else if (family.kind !== 'custom')
+                this._logOnce(`skipping ${name}: only custom themes can be added`);
             else if (BUILTIN_IDS.includes(family.id))
                 this._logOnce(`skipping ${name}: id "${family.id}" is reserved`);
             else if (name !== `${family.id}.json`)

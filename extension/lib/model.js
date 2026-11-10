@@ -9,6 +9,12 @@ export const VARIANTS = ['light', 'dark'];
 export const WALLPAPER_TYPES = ['none', 'solid', 'gradient', 'file'];
 
 const ID_RE = /^[a-z0-9-]+$/;
+export const MAX_NAME_LENGTH = 80;
+// The name ends up in CSS comments and INI files: no control characters or "*/".
+const CONTROL_RE = /[\u0000-\u001f\u007f]/;
+const isSafeText = s => !CONTROL_RE.test(s) && !s.includes('*/');
+// The icon theme is looked up as a directory name.
+const isPlainName = s => s !== '.' && s !== '..' && !s.includes('/') && !CONTROL_RE.test(s);
 
 const YARU_BASE = {
     light: {background: '#fafafa', foreground: '#3d3d3d', accent: '#e95420',
@@ -58,8 +64,9 @@ function validateVariant(name, v, errors) {
         else if (w.type === 'file' && typeof w.path !== 'string')
             errors.push(`${name}.wallpaper.path: missing`);
     }
-    if (v.iconTheme !== undefined && v.iconTheme !== null && typeof v.iconTheme !== 'string')
-        errors.push(`${name}.iconTheme: must be a string`);
+    if (v.iconTheme !== undefined && v.iconTheme !== null &&
+        !(typeof v.iconTheme === 'string' && isPlainName(v.iconTheme)))
+        errors.push(`${name}.iconTheme: must be an icon theme name`);
     if (v.vscodeTheme !== undefined && v.vscodeTheme !== null && typeof v.vscodeTheme !== 'string')
         errors.push(`${name}.vscodeTheme: must be a string`);
     if (v.vscodeExtension !== undefined && v.vscodeExtension !== null &&
@@ -77,6 +84,8 @@ export function validateFamily(obj) {
         errors.push('id: must match [a-z0-9-]+');
     if (typeof obj.name !== 'string' || !obj.name.trim())
         errors.push('name: must not be empty');
+    else if (obj.name.length > MAX_NAME_LENGTH || !isSafeText(obj.name))
+        errors.push(`name: at most ${MAX_NAME_LENGTH} characters, no line breaks or "*/"`);
     if (!['system', 'custom'].includes(obj.kind))
         errors.push('kind: must be "system" or "custom"');
     if (obj.kind === 'custom') {
@@ -154,7 +163,8 @@ export function duplicateFamily(family, name, existingIds) {
     } else {
         f = normalizeFamily(family);
     }
-    return {...f, version: FORMAT_VERSION, kind: 'custom', id: uniqueId(name, existingIds), name};
+    const safeName = name.slice(0, MAX_NAME_LENGTH);
+    return {...f, version: FORMAT_VERSION, kind: 'custom', id: uniqueId(safeName, existingIds), name: safeName};
 }
 
 function editVariant(family, variantName, fn) {

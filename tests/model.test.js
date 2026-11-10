@@ -83,3 +83,28 @@ test('model: resolveActiveId falls back to ubuntu', () => {
     assertEq(resolveActiveId([ubuntu, sol], 'gone'), 'ubuntu');
     assertEq(resolveActiveId([ubuntu, sol], 'solarized'), 'solarized');
 });
+
+test('model: names that could break generated files are invalid', () => {
+    for (const name of ['a */ window { opacity: 0 } /*', 'line\nbreak', 'tab\there', 'x'.repeat(81)]) {
+        const f = JSON.parse(JSON.stringify(sol));
+        f.name = name;
+        assertEq(validateFamily(f).ok, false, JSON.stringify(name));
+    }
+});
+
+test('model: icon theme must be a plain directory name', () => {
+    for (const icon of ['../evil', 'a/b', '..', '.', 'bad\nname']) {
+        const f = JSON.parse(JSON.stringify(sol));
+        f.dark.iconTheme = icon;
+        assertEq(validateFamily(f).ok, false, JSON.stringify(icon));
+    }
+    const ok = JSON.parse(JSON.stringify(sol));
+    ok.dark.iconTheme = 'Papirus-Dark';
+    assertEq(validateFamily(ok).ok, true);
+});
+
+test('model: a duplicate of a long-named theme is still valid', () => {
+    const f = JSON.parse(JSON.stringify(sol));
+    f.name = 'x'.repeat(80);
+    assertEq(validateFamily(duplicateFamily(f, `${f.name} (copy)`, [])).ok, true);
+});
