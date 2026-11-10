@@ -1,9 +1,14 @@
 {
   "uuid": "paletka@adamciktomas.github.io",
   "name": "Paletka",
-  "description": "Switch whole-desktop color themes (shell, apps, terminal, wallpaper, icons) from Quick Settings, and create your own in a built-in editor. Ships Ubuntu, Solarized, Gruvbox, Nord and Dracula.",
-  "shell-version": ["50"],
-  "session-modes": ["user", "unlock-dialog"],
+  "description": "Switch whole-desktop color themes (shell, apps, terminal, Text Editor, VS Code, wallpaper, icons) from Quick Settings, and create your own in a built-in editor. Ships Ubuntu, Solarized, Gruvbox, Nord and Dracula.\n\nTo theme apps, Paletka writes ~/.config/gtk-4.0/gtk.css, installs adw-gtk3 and generated GTK3 themes into ~/.local/share/themes, changes GNOME, Ptyxis, GNOME Terminal and Text Editor settings and the color theme keys of VS Code's settings.json, and restarts Files (never while it copies) and the desktop portal so they pick up the new colors. Everything is backed up first: choosing Ubuntu, turning Paletka off or uninstalling it restores your original look.\n\nIt stays enabled on the lock screen (unlock-dialog) so the shell keeps its colors there; the Theme tile is hidden while locked.",
+  "shell-version": [
+    "50"
+  ],
+  "session-modes": [
+    "user",
+    "unlock-dialog"
+  ],
   "settings-schema": "org.gnome.shell.extensions.paletka",
   "gettext-domain": "paletka",
   "url": "https://github.com/TomasAdamcik-dotcom/paletka",

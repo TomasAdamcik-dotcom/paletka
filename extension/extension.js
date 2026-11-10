@@ -191,7 +191,9 @@ export default class PaletkaExtension extends Extension {
         });
         const quickSettings = Main.panel.statusArea.quickSettings;
         quickSettings.addExternalIndicator(this._indicator);
-        // Place the tile right after the stock Dark Style tile.
+        // Place the tile right after the stock Dark Style tile. There is no public
+        // API for the position or for that tile, so this uses the private
+        // _darkMode indicator and falls back to the default place without it.
         const darkItem = quickSettings._darkMode?.quickSettingsItems?.[0];
         if (darkItem && darkItem.get_parent() === toggle.get_parent())
             toggle.get_parent().set_child_above_sibling(toggle, darkItem);
