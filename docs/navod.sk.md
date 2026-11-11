@@ -39,8 +39,7 @@ Hneď sa zmení:
 Pri prechode na *inú* rodinu tém si už otvorené aplikácie nechajú staré farby, kým ich znova
 neotvoríš. **Súbory** sa reštartujú samy a znova otvoria svoje okná. Počkajú, kým pracujú —
 kopírujú, presúvajú, mažú, prenášajú do telefónu alebo na sieťové umiestnenie, alebo sa ťa
-niečo pýtajú v dialógu. Kontrola sleduje aktivitu, preto pri veľmi veľkých operáciách so
-súbormi je najistejšie prepnúť tému až po ich skončení.
+niečo pýtajú — a reštartujú sa do pol minúty po skončení.
 
 ### VS Code
 

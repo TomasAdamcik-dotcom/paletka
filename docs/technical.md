@@ -108,16 +108,20 @@ comment- and format-preserving JSONC editor (`lib/jsonc.js`).
 ### Services (lib/services.js)
 
 After a family switch: `systemctl --user try-restart xdg-desktop-portal-gnome.service`
-(file chooser dialogs), and Files / Software are quit and restarted:
+(file chooser dialogs) — postponed, retried every 30 s, while the portal shows a window or
+the screen is shared (`Meta.RemoteAccessController` handles other than the shell's own
+recordings) — and Files / Software are quit and restarted:
 
 - Files with open windows is restarted right away and its windows are reopened at their
   first location (`org.freedesktop.FileManager1` `OpenWindowsWithLocations`).
-- `nautilus --quit` aborts running file operations, so Files counts as busy when one of its
-  windows is a dialog (conflict or error questions), or when, in each of three consecutive
+- `nautilus --quit` aborts running file operations, so Files counts as busy while it holds a
+  session manager inhibitor (it does for every copy, move, delete and trash operation, also
+  while one waits on a question inside its window), when one of its windows is a dialog,
+  or when, in each of three consecutive
   seconds, the Files process (PID of the session D-Bus name owner) plus the user's `gvfsd*`
   processes (phone, camera and network transfers) show I/O (`/proc/<pid>/io`) or CPU time
   (`/proc/<pid>/stat`, catches large deletes). While busy, the restart is retried every 30 s.
-  It is a heuristic: an operation that pauses for seconds without a dialog is not seen.
+  The activity checks back up the inhibitor where no session manager runs.
 - Only one Files restart runs at a time; switches made meanwhile get one more restart.
   Windows are reopened with `org.freedesktop.FileManager1.ShowFolders`.
 - Apps without windows are quit once their last window closes.

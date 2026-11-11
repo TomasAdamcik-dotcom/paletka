@@ -36,6 +36,7 @@ const QUIT_WHEN_HIDDEN = [
 const NAUTILUS = 'org.gnome.Nautilus.desktop';
 const RETRY_MS = 30000;
 const FILES_RESTART = 'files-restart';
+const PORTAL = 'portal';
 
 export class Services {
     // whenHidden(appId, cb) calls cb once the app has no windows left and
@@ -45,10 +46,12 @@ export class Services {
     // getWindowLocations() resolves Nautilus' open windows as arrays of URIs.
     // waitUntilStopped(appId) resolves once the app's process has exited.
     // openFolder(uri) opens a new Files window at uri.
+    // isPortalBusy() resolves true while the desktop portal shows a dialog or
+    // shares the screen; restarting it then would end those.
     constructor({
         spawn = defaultSpawn, hasWindows, whenHidden = null, isBusy = async () => false,
         later = defaultLater, getWindowLocations = async () => [], waitUntilStopped = async () => true,
-        openFolder = async () => {}, log = console.warn,
+        openFolder = async () => {}, isPortalBusy = async () => false, log = console.warn,
     }) {
         this._spawn = spawn;
         this._hasWindows = hasWindows;
@@ -58,6 +61,7 @@ export class Services {
         this._getWindowLocations = getWindowLocations;
         this._waitUntilStopped = waitUntilStopped;
         this._openFolder = openFolder;
+        this._isPortalBusy = isPortalBusy;
         this._log = log;
         this._pending = new Map();
         this._epoch = 0;
@@ -76,9 +80,27 @@ export class Services {
 
     async restart() {
         const epoch = this._epoch;
-        await this._run(['systemctl', '--user', 'try-restart', 'xdg-desktop-portal-gnome.service']);
+        await this._restartPortal(epoch);
         for (const [appId, argv] of QUIT_WHEN_HIDDEN)
             await this._quitSafely(appId, argv, epoch);
+    }
+
+    // The portal's file chooser keeps the old colors until the portal restarts.
+    async _restartPortal(epoch) {
+        this._pending.get(PORTAL)?.();
+        this._pending.delete(PORTAL);
+        if (epoch !== this._epoch)
+            return;
+        if (await this._isPortalBusy()) {
+            if (epoch === this._epoch && !this._destroyed)
+                this._pending.set(PORTAL, this._later(RETRY_MS, () => {
+                    this._pending.delete(PORTAL);
+                    this._restartPortal(epoch);
+                }));
+            return;
+        }
+        if (epoch === this._epoch)
+            await this._run(['systemctl', '--user', 'try-restart', 'xdg-desktop-portal-gnome.service']);
     }
 
     // The app's background service outlives its windows and keeps the old

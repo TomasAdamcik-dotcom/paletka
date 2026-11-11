@@ -73,6 +73,7 @@ export default class PaletkaExtension extends Extension {
             getWindowLocations: () => this._filesWindowLocations(),
             waitUntilStopped: id => this._waitUntilStopped(id),
             openFolder: uri => this._openFilesWindow(uri),
+            isPortalBusy: () => this._isPortalBusy(),
             log,
         });
         this._applier = new Applier({
@@ -94,6 +95,19 @@ export default class PaletkaExtension extends Extension {
         this._schemeTimeoutId = 0;
 
         this._addIndicator();
+
+        // Screen sharing and remote desktop sessions (not the shell's own
+        // screen recordings), which a portal restart would end.
+        this._sharing = new Set();
+        global.backend.get_remote_access_controller()?.connectObject('new-handle', (_c, handle) => {
+            if (handle.is_recording)
+                return;
+            this._sharing.add(handle);
+            handle.connectObject('stopped', () => {
+                handle.disconnectObject(this);
+                this._sharing?.delete(handle);
+            }, this);
+        }, this);
 
         this._settings.connectObject('changed::active-family', () => this._enqueue(generation => this._applyActive(generation)), this);
         this._iface.connectObject('changed::color-scheme', () => {
@@ -139,6 +153,10 @@ export default class PaletkaExtension extends Extension {
         this._noticeSource = null;
         this._vscodeSuggested = null;
         Main.sessionMode.disconnectObject(this);
+        global.backend.get_remote_access_controller()?.disconnectObject(this);
+        for (const handle of this._sharing ?? [])
+            handle.disconnectObject(this);
+        this._sharing = null;
         this._settings?.disconnectObject(this);
         this._iface?.disconnectObject(this);
         this._unloadStylesheet();
@@ -349,10 +367,12 @@ export default class PaletkaExtension extends Extension {
     }
 
     // PID of the process owning the app's D-Bus name in this session, if running.
-    async _pidsFor(appId) {
+    _pidsFor(appId) {
         const name = BUS_NAMES[appId];
-        if (!name)
-            return [];
+        return name ? this._pidsForName(name) : Promise.resolve([]);
+    }
+
+    async _pidsForName(name) {
         try {
             const reply = await Gio.DBus.session.call('org.freedesktop.DBus', '/org/freedesktop/DBus',
                 'org.freedesktop.DBus', 'GetConnectionUnixProcessID', new GLib.Variant('(s)', [name]),
@@ -421,6 +441,15 @@ export default class PaletkaExtension extends Extension {
             await this._sleep(100);
         }
         return false;
+    }
+
+    // True while the portal shows a window (e.g. a file chooser) or the screen
+    // is shared.
+    async _isPortalBusy() {
+        if (this._sharing?.size)
+            return true;
+        const pids = await this._pidsForName('org.freedesktop.impl.portal.desktop.gnome');
+        return global.get_window_actors().some(a => pids.includes(a.meta_window.get_pid()));
     }
 
     // D-Bus activation starts Files as its own service, outside the shell.

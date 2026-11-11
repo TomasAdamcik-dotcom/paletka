@@ -39,8 +39,7 @@ What changes right away:
 When you switch to a *different* theme family, apps that are already open keep their old
 colors until you reopen them. **Files** is restarted for you and reopens its windows. It
 waits while Files is working — copying, moving, deleting, transferring to a phone or a network
-location, or asking you something in a dialog. The check watches activity, so with very large
-file operations it is safest to switch themes after they finish.
+location, or asking you something — and restarts it within half a minute after it is done.
 
 ### VS Code
 

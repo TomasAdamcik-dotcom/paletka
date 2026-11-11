@@ -242,11 +242,13 @@ test('services: restartFilesWhenIdle leaves closed Files to the normal quit', as
 test('services: nothing runs or is watched after destroy during a restart', async () => {
     const calls = [];
     const watchers = new Map();
-    let releasePortal;
-    const services = new Services({
-        spawn: argv => {
+    let services;
+    services = new Services({
+        spawn: async argv => {
             calls.push(argv.join(' '));
-            return argv[0] === 'systemctl' ? new Promise(r => (releasePortal = r)) : Promise.resolve();
+            // disable() while systemctl still runs
+            if (argv[0] === 'systemctl')
+                services.destroy();
         },
         hasWindows: id => id === NAUTILUS,
         whenHidden: (id, cb) => {
@@ -255,10 +257,7 @@ test('services: nothing runs or is watched after destroy during a restart', asyn
         },
         log: () => {},
     });
-    const done = services.restart();
-    services.destroy();
-    releasePortal();
-    await done;
+    await services.restart();
     assertEq(calls, ['systemctl --user try-restart xdg-desktop-portal-gnome.service']);
     assertEq(watchers.size, 0);
 });
@@ -302,4 +301,26 @@ test('services: rapid switches never run two Files restarts at once', async () =
     assertEq(maxRunning, 1);
     // the switches made meanwhile are covered by one more restart
     assertEq(calls.filter(c => c === 'nautilus --quit').length, 2);
+});
+
+test('services: the portal is not restarted while it shows a dialog or shares the screen', async () => {
+    const calls = [];
+    const timers = [];
+    const state = {portalBusy: true};
+    const services = new Services({
+        spawn: async argv => calls.push(argv.join(' ')),
+        hasWindows: () => false,
+        isPortalBusy: async () => state.portalBusy,
+        later: (ms, cb) => {
+            timers.push(cb);
+            return () => {};
+        },
+        log: () => {},
+    });
+    await services.restart();
+    assertEq(calls.some(c => c.startsWith('systemctl')), false);
+    assertEq(calls.includes('nautilus --quit'), true);
+    state.portalBusy = false;
+    await timers.shift()();
+    assertEq(calls.filter(c => c.startsWith('systemctl')).length, 1);
 });
