@@ -363,6 +363,25 @@ export default class PaletkaExtension extends Extension {
         }
     }
 
+    // Files blocks logout and suspend for as long as a copy, move, delete or
+    // trash operation runs, including while it waits on a question.
+    async _inhibitsLogout(appId) {
+        const id = appId.replace(/\.desktop$/, '');
+        const call = (path, iface, method, type) => Gio.DBus.session.call('org.gnome.SessionManager', path,
+            iface, method, null, new GLib.VariantType(type), Gio.DBusCallFlags.NO_AUTO_START, 1000, this._cancellable);
+        try {
+            const reply = await call('/org/gnome/SessionManager', 'org.gnome.SessionManager', 'GetInhibitors', '(ao)');
+            for (const path of reply.deepUnpack()[0]) {
+                const [owner] = (await call(path, 'org.gnome.SessionManager.Inhibitor', 'GetAppId', '(s)')).deepUnpack();
+                if (owner === id)
+                    return true;
+            }
+        } catch {
+            // No session manager (e.g. a nested test shell): rely on the other checks.
+        }
+        return false;
+    }
+
     // A dialog of the app (e.g. Files asking what to do with an existing file
     // in the middle of a copy) means work is waiting for the user.
     _hasDialog(appId) {
@@ -375,7 +394,7 @@ export default class PaletkaExtension extends Extension {
     // consecutive seconds. For Files this includes the gvfsd processes that do
     // the transfers for phones, cameras and network locations.
     async _isBusy(appId) {
-        if (this._hasDialog(appId))
+        if (this._hasDialog(appId) || await this._inhibitsLogout(appId))
             return true;
         const pids = await this._pidsFor(appId);
         if (pids.length === 0 || !this._fs)

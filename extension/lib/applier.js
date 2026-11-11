@@ -243,10 +243,10 @@ export class Applier {
         const {palette, style} = this._ptyxisRefs();
         if (!palette)
             return;
-        if (style) {
-            this._backup.extend([style]);
+        // The default profile may have changed since the snapshot.
+        this._backup.extend([palette, style].filter(Boolean));
+        if (style)
             this._set(style, 'system');
-        }
         const id = ptyxisPaletteId(family);
         this._fs.writeText(`${this._paths.ptyxisPaletteDir}/${id}.palette`, ptyxisPalette(family));
         this._set(palette, id);
@@ -346,6 +346,7 @@ export class Applier {
         this._set(REFS.accent, nearestAccent(v.base.accent));
 
         const termRefs = this._terminalRefs();
+        this._backup.extend(Object.values(termRefs));
         for (const [key, value] of Object.entries(gnomeTerminalValues(v.terminal)))
             this._set(termRefs[key], value);
 

@@ -93,3 +93,20 @@ test('restore without a backup resets settings that still name Paletka files', a
     assert(!String(get(settings, keys.ptyxisPalette)).startsWith('paletka-'), 'ptyxis');
     assert(!String(get(settings, keys.editorScheme)).startsWith('paletka-'), 'editor');
 });
+
+test('restore: a terminal profile made default while a family is active is restored too', async () => {
+    const {applier, settings, sol} = setup();
+    await applier.applyFamily(sol, false, {restartServices: false});
+    const p2 = '/org/gnome/Ptyxis/Profiles/p2/';
+    const t2 = '/org/gnome/terminal/legacy/profiles:/:t2/';
+    const K = (schema, key, path) => `${schema}|${path}|${key}`;
+    settings.values.set(K('org.gnome.Ptyxis', 'default-profile-uuid', ''), 'p2');
+    settings.set({schema: 'org.gnome.Ptyxis.Profile', key: 'palette', path: p2}, 'gnome');
+    settings.values.set(K('org.gnome.Terminal.ProfilesList', 'default', ''), 't2');
+    settings.set({schema: 'org.gnome.Terminal.Legacy.Profile', key: 'use-theme-colors', path: t2}, true);
+    await applier.applyFamily(sol, true, {restartServices: false});
+    assertEq(settings.values.get(K('org.gnome.Ptyxis.Profile', 'palette', p2)), 'paletka-solarized');
+    await applier.restoreSystem(true, {restartServices: false});
+    assertEq(settings.values.get(K('org.gnome.Ptyxis.Profile', 'palette', p2)), 'gnome');
+    assertEq(settings.values.get(K('org.gnome.Terminal.Legacy.Profile', 'use-theme-colors', t2)), true);
+});
