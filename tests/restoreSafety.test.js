@@ -110,3 +110,19 @@ test('restore: a terminal profile made default while a family is active is resto
     assertEq(settings.values.get(K('org.gnome.Ptyxis.Profile', 'palette', p2)), 'gnome');
     assertEq(settings.values.get(K('org.gnome.Terminal.Legacy.Profile', 'use-theme-colors', t2)), true);
 });
+
+test('removeFamilyFiles drops the generated files of a deleted theme only', async () => {
+    const {applier, fs, paths, sol} = setup();
+    const other = JSON.parse(JSON.stringify(sol));
+    other.id = 'other';
+    await applier.applyFamily(other, false, {restartServices: false});
+    await applier.applyFamily(sol, false, {restartServices: false});
+    applier.removeFamilyFiles('other');
+    const left = dir => fs.listDir(dir).filter(n => n.includes('other'));
+    assertEq(left(paths.userThemesDir), []);
+    assertEq(left(paths.sourceStylesDir), []);
+    assertEq(left(paths.ptyxisPaletteDir), []);
+    assertEq(left(paths.wallpaperDir), []);
+    assert(fs.exists(`${paths.userThemesDir}/paletka-solarized-light`), 'active theme kept');
+    assert(fs.exists(`${paths.ptyxisPaletteDir}/paletka-solarized.palette`), 'active palette kept');
+});

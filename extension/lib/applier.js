@@ -404,6 +404,32 @@ export class Applier {
             await this._services.restart();
     }
 
+    // Generated files of a theme that was deleted, unless still in use.
+    removeFamilyFiles(id) {
+        const family = {id};
+        const inUse = ref => {
+            try {
+                return ref && this._settings.exists(ref) ? String(this._settings.get(ref)) : '';
+            } catch {
+                return '';
+            }
+        };
+        const gtkTheme = inUse(REFS.gtkTheme);
+        for (const isDark of [false, true]) {
+            const name = gtk3ThemeName(family, isDark);
+            if (name !== gtkTheme)
+                this._fs.removeTree(`${this._paths.userThemesDir}/${name}`);
+            this._fs.remove(`${this._paths.sourceStylesDir}/${sourceSchemeId(family, isDark)}.xml`);
+            const wallpaper = `${this._paths.wallpaperDir}/${id}-${variantName(isDark)}.svg`;
+            const uri = GLib.filename_to_uri(wallpaper, null);
+            if (![REFS.pictureUri, REFS.pictureUriDark].some(ref => inUse(ref) === uri))
+                this._fs.remove(wallpaper);
+        }
+        const palette = ptyxisPaletteId(family);
+        if (inUse(this._ptyxisRefs().palette) !== palette)
+            this._fs.remove(`${this._paths.ptyxisPaletteDir}/${palette}.palette`);
+    }
+
     // Whether a custom family is applied (its snapshot of the original look exists).
     isApplied() {
         return this._backup.has();

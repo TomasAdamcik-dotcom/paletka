@@ -530,6 +530,15 @@ export default class PaletkaExtension extends Extension {
 
     _onThemesChanged(changedId) {
         this._refreshToggle();
+        if (changedId !== null && /^[a-z0-9-]+$/.test(changedId) && changedId !== SYSTEM_ID) {
+            const changed = this._store.get(changedId);
+            if (changed)
+                // Text Editor lists every theme, so keep its scheme current.
+                this._applier.writeSourceSchemes([changed]);
+            else
+                // Deleted: after any switch back to Ubuntu below, drop its files.
+                this._enqueue(() => this._applier.removeFamilyFiles(changedId));
+        }
         const activeId = this._settings.get_string('active-family');
         if (activeId === SYSTEM_ID)
             return;
