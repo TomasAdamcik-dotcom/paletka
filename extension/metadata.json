@@ -12,5 +12,5 @@
   "settings-schema": "org.gnome.shell.extensions.paletka",
   "gettext-domain": "paletka",
   "url": "https://github.com/TomasAdamcik-dotcom/paletka",
-  "version-name": "1.0.0"
+  "version-name": "1.0.1"
 }
