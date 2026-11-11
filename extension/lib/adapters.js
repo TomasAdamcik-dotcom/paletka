@@ -27,10 +27,21 @@ export class GioFs {
         GLib.mkdir_with_parents(path, 0o755);
     }
 
+    // Replaces the file atomically, keeping the permissions of an existing one
+    // (e.g. a private 0600 settings file).
     writeText(path, text) {
         this.mkdirp(GLib.path_get_dirname(path));
-        Gio.File.new_for_path(path).replace_contents(encoder.encode(text), null, false,
-            Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+        const file = Gio.File.new_for_path(path);
+        let mode = null;
+        try {
+            mode = file.query_info('unix::mode', Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, null)
+                .get_attribute_uint32('unix::mode') & 0o7777;
+        } catch {
+            // New file: default permissions.
+        }
+        file.replace_contents(encoder.encode(text), null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+        if (mode !== null)
+            file.set_attribute_uint32('unix::mode', mode, Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, null);
     }
 
     remove(path) {

@@ -15,10 +15,14 @@ export class JsonFileSettings {
 
     // Edit the file a symlink points to, so dotfile-managed links stay links.
     _target(path) {
-        const link = this._fs.readLink(path);
-        if (link === null)
-            return path;
-        return GLib.path_is_absolute(link) ? link : GLib.build_filenamev([GLib.path_get_dirname(path), link]);
+        let target = path;
+        for (let i = 0; i < 40; i++) {
+            const link = this._fs.readLink(target);
+            if (link === null)
+                return target;
+            target = GLib.path_is_absolute(link) ? link : GLib.build_filenamev([GLib.path_get_dirname(target), link]);
+        }
+        throw new Error(`too many symlinks at ${path}`);
     }
 
     // A missing file reads as an empty object. An existing file that cannot be

@@ -99,3 +99,15 @@ test('jsonFileSettings: an edit that would break the file is not written', () =>
     assert(threw, 'reset refused');
     assertEq(fs.readText(path), text);
 });
+
+test('jsonFileSettings: edits the final file behind a chain of symlinks', () => {
+    const d = tmpDir();
+    fs.writeText(`${d}/real.json`, '{}\n');
+    GLib.mkdir_with_parents(`${d}/user`, 0o755);
+    fs.symlink(`${d}/real.json`, `${d}/middle.json`);
+    fs.symlink('../middle.json', `${d}/user/settings.json`);
+    const s = new JsonFileSettings({fs, log: () => {}});
+    s.set(ref(`${d}/user/settings.json`, 'a'), true);
+    assertEq(fs.readLink(`${d}/middle.json`), `${d}/real.json`);
+    assertEq(JSON.parse(fs.readText(`${d}/real.json`)), {a: true});
+});

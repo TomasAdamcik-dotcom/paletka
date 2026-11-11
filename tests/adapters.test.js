@@ -1,3 +1,5 @@
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 import {test, assert, assertEq} from './harness.js';
 import {tmpDir} from './harness.js';
 import {GioFs, GioSettingsAdapter} from '../extension/lib/adapters.js';
@@ -25,4 +27,14 @@ test('adapters: GioSettingsAdapter.exists', () => {
     assert(!s.exists({schema: 'org.gnome.desktop.interface', key: 'nope'}));
     assert(!s.exists({schema: 'org.example.nope', key: 'x'}));
     assertEq(typeof s.get({schema: 'org.gnome.desktop.interface', key: 'gtk-theme'}), 'string');
+});
+
+test('adapters: writeText keeps the permissions of an existing file', () => {
+    const fs = new GioFs();
+    const path = `${tmpDir()}/private.json`;
+    fs.writeText(path, '{}');
+    GLib.chmod(path, 0o600);
+    fs.writeText(path, '{"a": 1}');
+    const mode = Gio.File.new_for_path(path).query_info('unix::mode', 0, null).get_attribute_uint32('unix::mode');
+    assertEq(mode & 0o777, 0o600);
 });
