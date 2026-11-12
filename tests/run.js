@@ -2,7 +2,8 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import System from 'system';
-import {registry} from './harness.js';
+import {registry, tmpDirs} from './harness.js';
+import {GioFs} from '../extension/lib/adapters.js';
 
 const dir = GLib.path_get_dirname(GLib.filename_from_uri(import.meta.url)[0]);
 const filter = ARGV[0] ?? '';
@@ -28,5 +29,8 @@ for (const {name, fn} of registry) {
         print(`FAIL ${name}\n     ${e.message}`);
     }
 }
+const fs = new GioFs();
+for (const dir of tmpDirs)
+    fs.removeTree(dir);
 print(`\n${registry.length - failed}/${registry.length} passed`);
 System.exit(failed ? 1 : 0);

@@ -28,6 +28,11 @@ export function assertThrows(fn, msg = 'expected function to throw') {
     throw new Error(msg);
 }
 
+// Temporary directories, removed by run.js when all tests are done.
+export const tmpDirs = [];
+
 export function tmpDir() {
-    return GLib.dir_make_tmp('paletka-test-XXXXXX');
+    const dir = GLib.dir_make_tmp('paletka-test-XXXXXX');
+    tmpDirs.push(dir);
+    return dir;
 }
