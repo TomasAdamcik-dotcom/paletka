@@ -15,6 +15,8 @@ mkdir -p "$OUT"
 # Wayland socket paths are limited to 108 bytes: keep the environment short.
 E2E="$(mktemp -d "/run/user/$(id -u)/dt-e2e-XXXX")"
 cleanup() {
+    # Helpers started by the nested session (gvfsd, wsdd) would outlive it.
+    pkill -f "$E2E" 2>/dev/null || true
     for m in $(mount | awk -v d="$E2E" 'index($3, d) == 1 {print $3}'); do
         fusermount3 -u "$m" 2>/dev/null || fusermount -u "$m" 2>/dev/null || true
     done
@@ -62,6 +64,8 @@ export XDG_CONFIG_HOME="$E2E/config" XDG_DATA_HOME="$E2E/data" XDG_CACHE_HOME="$
     XDG_RUNTIME_DIR="$E2E/runtime" XDG_CURRENT_DESKTOP="ubuntu:GNOME" \
     GSETTINGS_SCHEMA_DIR="$EXT_DIR/$UUID/schemas:/usr/share/glib-2.0/schemas" \
     E2E_ROOT="$ROOT" E2E_OUT="$OUT" E2E_UUID="$UUID" HOME="$E2E/home" PATH="$E2E/bin:$PATH"
+# No gvfs in the nested session: its daemons and their wsdd helper outlive it.
+export GIO_USE_VFS=local GVFS_DISABLE_FUSE=1
 unset WAYLAND_DISPLAY DISPLAY DBUS_SESSION_BUS_ADDRESS
 
 set +e
