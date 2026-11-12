@@ -1,6 +1,7 @@
 // E2E scenario, run by tests/e2e/run.sh inside the nested session.
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import GdkPixbuf from 'gi://GdkPixbuf';
 import System from 'system';
 
 const UUID = GLib.getenv('E2E_UUID');
@@ -464,6 +465,71 @@ step('7h. browsers: the menu opens Settings, switching a browser installs its ho
     ext.set_strv('browsers', []);
     waitFor('chrome manifest removed', () => read(manifest) === null);
 });
+
+// Color of the screenshot at (x, y) as [r, g, b].
+function pixel(path, x, y) {
+    const pixbuf = GdkPixbuf.Pixbuf.new_from_file(path);
+    const bytes = pixbuf.get_pixels();
+    const i = y * pixbuf.get_rowstride() + x * pixbuf.get_n_channels();
+    return [bytes[i], bytes[i + 1], bytes[i + 2]];
+}
+const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) <= 24);
+
+if (GLib.find_program_in_path('google-chrome')) {
+    step('7i. Chrome started from Paletka\'s launcher follows the theme', () => {
+        ext.set_boolean('chrome-window', true);
+        const launcher = `${DATA}/applications/google-chrome.desktop`;
+        waitFor('chrome launcher', () => read(launcher)?.includes('--gtk-version=3'));
+        selectFamily('Solarized', true);
+        waitFor('solarized dark', () => iface.get_string('gtk-theme') === 'paletka-solarized-dark');
+        const profile = `${HOME}/chrome-profile`;
+        GLib.mkdir_with_parents(`${profile}/Default`, 0o755);
+        GLib.file_set_contents(`${profile}/Default/Preferences`, JSON.stringify({extensions: {theme: {system_theme: 1}}}));
+        GLib.file_set_contents(`${profile}/First Run`, '');
+        const exec = read(launcher).split('\n').find(l => l.startsWith('Exec=')).slice(5).replace(' %U', '').split(' ');
+        const chromeLauncher = new Gio.SubprocessLauncher({
+            flags: Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE,
+        });
+        chromeLauncher.setenv('WAYLAND_DISPLAY', 'wayland-0', true);
+        const chrome = chromeLauncher.spawnv([...exec, `--user-data-dir=${profile}`, '--ozone-platform=wayland',
+            '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--password-store=basic',
+            '--window-size=900,600', 'about:blank']);
+        try {
+            const toolbar = () => {
+                const rect = evalShell(`(() => {
+                    const w = global.get_window_actors().map(a => a.meta_window)
+                        .find(m => (m.get_wm_class() ?? '').toLowerCase().includes('chrome'));
+                    if (!w) return null;
+                    const r = w.get_frame_rect();
+                    return {x: r.x, y: r.y, width: r.width};
+                })()`);
+                if (!rect)
+                    return null;
+                const shot = `${OUT}/14-chrome-${iface.get_string('gtk-theme')}.png`;
+                call('org.gnome.Shell.Screenshot', '/org/gnome/Shell/Screenshot', 'org.gnome.Shell.Screenshot',
+                    'Screenshot', new GLib.Variant('(bbs)', [false, false, shot]), '(bs)');
+                // The toolbar, left of the back button.
+                return pixel(shot, rect.x + 8, rect.y + 62);
+            };
+            const headerbar = () => hexRgb(JSON.parse(read(`${DATA}/paletka/current.json`)).colors.headerbar_bg);
+            waitFor('chrome toolbar in Solarized', () => {
+                const px = toolbar();
+                return px && near(px, headerbar()) && px;
+            }, 20000);
+            selectFamily('Nord', true);
+            waitFor('nord dark', () => iface.get_string('gtk-theme') === 'paletka-nord-dark');
+            waitFor('chrome toolbar follows to Nord', () => {
+                const px = toolbar();
+                return px && near(px, headerbar()) && px;
+            }, 10000);
+        } finally {
+            chrome.force_exit();
+            ext.set_boolean('chrome-window', false);
+        }
+        waitFor('chrome launcher removed', () => read(launcher) === null);
+    });
+}
 
 step('8. back to Ubuntu restores everything', () => {
     selectFamily('Ubuntu');

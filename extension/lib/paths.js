@@ -17,6 +17,8 @@ export function defaultPaths({
         browserHostDir: `${dataDir}/paletka/browser-host`,
         home: GLib.get_home_dir(),
         binDirs: ['/usr/bin', '/snap/bin'],
+        applicationsDir: `${dataDir}/applications`,
+        systemApplicationsDirs: GLib.get_system_data_dirs().map(d => `${d}/applications`),
         shellCssDir: `${cacheDir}/paletka`,
         wallpaperDir: `${dataDir}/backgrounds/paletka`,
         sourceStylesDir: `${dataDir}/gtksourceview-5/styles`,

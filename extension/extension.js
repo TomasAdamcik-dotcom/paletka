@@ -23,6 +23,7 @@ import {fmt} from './lib/format.js';
 import {installVscodeExtensions} from './lib/vscodeInstaller.js';
 import {continuousActivity, sampleIo, findProcesses} from './lib/activity.js';
 import {BROWSERS, installHost, removeHost} from './lib/browsers.js';
+import {enableChromeWindow, disableChromeWindow} from './lib/chromeWindow.js';
 
 const SCHEME_DEBOUNCE_MS = 150;
 const NAUTILUS = 'org.gnome.Nautilus.desktop';
@@ -112,7 +113,9 @@ export default class PaletkaExtension extends Extension {
 
         this._settings.connectObject('changed::active-family', () => this._enqueue(generation => this._applyActive(generation)), this);
         this._settings.connectObject('changed::browsers', () => this._syncBrowserHosts(), this);
+        this._settings.connectObject('changed::chrome-window', () => this._syncChromeWindow(), this);
         this._syncBrowserHosts();
+        this._syncChromeWindow();
         this._iface.connectObject('changed::color-scheme', () => {
             this._refreshToggle();
             this._scheduleVariant();
@@ -194,6 +197,21 @@ export default class PaletkaExtension extends Extension {
             } catch (e) {
                 this._logger.warn(`cannot set up ${browser.name}: ${e.message}`);
             }
+        }
+    }
+
+    // Rewritten on every enable so the copy follows Chrome's own launcher.
+    _syncChromeWindow() {
+        try {
+            if (!this._settings.get_boolean('chrome-window')) {
+                disableChromeWindow(this._fs, this._paths);
+                return;
+            }
+            const result = enableChromeWindow(this._fs, this._paths);
+            if (result === 'conflict')
+                this._logger.warn('~/.local/share/applications/google-chrome.desktop is your own; leaving it alone');
+        } catch (e) {
+            this._logger.warn(`cannot set up Chrome's window: ${e.message}`);
         }
     }
 
