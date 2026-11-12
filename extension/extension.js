@@ -22,6 +22,7 @@ import {ThemeIndicator} from './lib/toggle.js';
 import {fmt} from './lib/format.js';
 import {installVscodeExtensions} from './lib/vscodeInstaller.js';
 import {continuousActivity, sampleIo, findProcesses} from './lib/activity.js';
+import {BROWSERS, installHost, removeHost} from './lib/browsers.js';
 
 const SCHEME_DEBOUNCE_MS = 150;
 const NAUTILUS = 'org.gnome.Nautilus.desktop';
@@ -110,6 +111,8 @@ export default class PaletkaExtension extends Extension {
         }, this);
 
         this._settings.connectObject('changed::active-family', () => this._enqueue(generation => this._applyActive(generation)), this);
+        this._settings.connectObject('changed::browsers', () => this._syncBrowserHosts(), this);
+        this._syncBrowserHosts();
         this._iface.connectObject('changed::color-scheme', () => {
             this._refreshToggle();
             this._scheduleVariant();
@@ -176,6 +179,22 @@ export default class PaletkaExtension extends Extension {
         this._fs = null;
         this._queue = null;
         this._logger = null;
+    }
+
+    // The browser host is installed for the browsers chosen in the preferences
+    // (re-installed on enable so an updated extension ships its new host).
+    _syncBrowserHosts() {
+        const wanted = this._settings.get_strv('browsers');
+        for (const browser of BROWSERS) {
+            try {
+                if (wanted.includes(browser.id))
+                    installHost(this._fs, this._paths, browser, `${this.path}/browser-host`);
+                else
+                    removeHost(this._fs, this._paths, browser);
+            } catch (e) {
+                this._logger.warn(`cannot set up ${browser.name}: ${e.message}`);
+            }
+        }
     }
 
     // Disabling another extension that was enabled earlier makes the shell

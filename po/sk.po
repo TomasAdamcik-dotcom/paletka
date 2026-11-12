@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: paletka 1.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 13:41+0100\n"
+"POT-Creation-Date: 2026-11-12 14:40+0100\n"
 "PO-Revision-Date: 2026-11-02 12:00+0100\n"
 "Last-Translator: Tomas Adamcik\n"
 "Language-Team: Slovak\n"
@@ -16,23 +16,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: extension/extension.js:229
+#: extension/extension.js:305 extension/extension.js:548
 msgid "Paletka"
 msgstr "Paletka"
 
-#: extension/extension.js:284
+#: extension/extension.js:366
 msgid "Theme changed"
 msgstr "Téma zmenená"
 
-#: extension/extension.js:284
+#: extension/extension.js:366
 msgid "Open apps will use the new colors after they are reopened."
 msgstr "Otvorené aplikácie použijú nové farby po opätovnom spustení."
 
-#: extension/extension.js:378
+#: extension/extension.js:517
 msgid "Old color settings found"
 msgstr "Nájdené staré nastavenia farieb"
 
-#: extension/extension.js:379
+#: extension/extension.js:518
 #, javascript-format
 msgid ""
 "%s pins light colors with the old @define-color syntax. Apps may be "
@@ -43,43 +43,95 @@ msgstr ""
 "Ubuntu môžu byť aplikácie v tmavom režime nečitateľné. Ak to uvidíte, súbor "
 "presuňte alebo odstráňte."
 
-#: extension/extension.js:410
+#: extension/extension.js:533
 #, javascript-format
 msgid "VS Code theme for %s is not installed"
 msgstr "Téma VS Code pre %s nie je nainštalovaná"
 
-#: extension/extension.js:411
+#: extension/extension.js:534
 msgid "Install it so VS Code switches together with the desktop theme."
 msgstr ""
 "Nainštalujte ju, aby sa VS Code prepínal spolu s témou pracovnej plochy."
 
-#: extension/extension.js:413
+#: extension/extension.js:537
 msgid "Install theme"
 msgstr "Nainštalovať tému"
 
-#: extension/extension.js:423
+#: extension/extension.js:563
 msgid "VS Code theme was not installed"
 msgstr "Téma VS Code sa nenainštalovala"
 
-#: extension/extension.js:424
+#: extension/extension.js:564
 msgid "The VS Code command line (code) was not found."
 msgstr "Príkaz VS Code (code) sa nenašiel."
 
-#: extension/extension.js:427
+#: extension/extension.js:567
 msgid "VS Code theme installed"
 msgstr "Téma VS Code je nainštalovaná"
 
-#: extension/extension.js:427
+#: extension/extension.js:567
 msgid "VS Code now follows the desktop theme."
 msgstr "VS Code sa teraz prepína spolu s témou pracovnej plochy."
 
+#: extension/lib/prefs/browsersPage.js:18
+msgid "Off"
+msgstr "Vypnuté"
+
+#: extension/lib/prefs/browsersPage.js:19
+msgid "Install the Paletka extension in this browser"
+msgstr "Nainštalujte rozšírenie Paletka v tomto prehliadači"
+
+#: extension/lib/prefs/browsersPage.js:20
+msgid "Focus Firefox and allow Paletka in the system dialog"
+msgstr "Prepnite sa do Firefoxu a povoľte Paletku v systémovom dialógu"
+
+#: extension/lib/prefs/browsersPage.js:21
+msgid "Active"
+msgstr "Aktívne"
+
+#: extension/lib/prefs/browsersPage.js:42
+msgid "Browsers"
+msgstr "Prehliadače"
+
+#: extension/lib/prefs/browsersPage.js:49
+msgid "Web pages"
+msgstr "Webové stránky"
+
+#: extension/lib/prefs/browsersPage.js:50
+msgid ""
+"Recolor web pages with the active theme. Each browser needs the Paletka "
+"browser extension."
+msgstr ""
+"Prefarbí webové stránky aktívnou témou. Každý prehliadač potrebuje "
+"rozšírenie Paletka."
+
+#: extension/lib/prefs/browsersPage.js:55
+msgid "No supported browser found"
+msgstr "Nenašiel sa žiadny podporovaný prehliadač"
+
+#: extension/lib/prefs/browsersPage.js:60
+msgid "Get Extension"
+msgstr "Získať rozšírenie"
+
+#: extension/lib/prefs/browsersPage.js:68
+msgid "Theme Chrome’s window"
+msgstr "Farbiť aj okno Chromu"
+
+#: extension/lib/prefs/browsersPage.js:69
+msgid ""
+"Restarts Chrome with GTK 3 from now on. Also choose Appearance → Mode → GTK "
+"in Chrome’s settings."
+msgstr ""
+"Odteraz spúšťa Chrome s GTK 3. V nastaveniach Chromu zvoľte aj Vzhľad → "
+"Režim → GTK."
+
 #: extension/lib/prefs/familyEditorPage.js:23
-#: extension/lib/prefs/familyEditorPage.js:189
+#: extension/lib/prefs/familyEditorPage.js:194
 msgid "Background"
 msgstr "Pozadie"
 
 #: extension/lib/prefs/familyEditorPage.js:24
-#: extension/lib/prefs/familyEditorPage.js:188
+#: extension/lib/prefs/familyEditorPage.js:193
 msgid "Text"
 msgstr "Text"
 
@@ -100,12 +152,12 @@ msgid "Error"
 msgstr "Chyba"
 
 #: extension/lib/prefs/familyEditorPage.js:48 extension/lib/toggle.js:63
-#: extension/lib/toggle.js:81
+#: extension/lib/toggle.js:78
 msgid "Light"
 msgstr "Svetlá"
 
 #: extension/lib/prefs/familyEditorPage.js:49 extension/lib/toggle.js:63
-#: extension/lib/toggle.js:81
+#: extension/lib/toggle.js:78
 msgid "Dark"
 msgstr "Tmavá"
 
@@ -113,145 +165,145 @@ msgstr "Tmavá"
 msgid "Name"
 msgstr "Názov"
 
-#: extension/lib/prefs/familyEditorPage.js:134
+#: extension/lib/prefs/familyEditorPage.js:139
 msgid "Base colors"
 msgstr "Základné farby"
 
-#: extension/lib/prefs/familyEditorPage.js:135
+#: extension/lib/prefs/familyEditorPage.js:140
 msgid "Everything else is derived from these six colors."
 msgstr "Všetko ostatné sa odvodí z týchto šiestich farieb."
 
-#: extension/lib/prefs/familyEditorPage.js:148
+#: extension/lib/prefs/familyEditorPage.js:153
 msgid "Advanced"
 msgstr "Pokročilé"
 
-#: extension/lib/prefs/familyEditorPage.js:150
+#: extension/lib/prefs/familyEditorPage.js:155
 msgid "Derived colors"
 msgstr "Odvodené farby"
 
-#: extension/lib/prefs/familyEditorPage.js:151
+#: extension/lib/prefs/familyEditorPage.js:156
 msgid "Override any computed color"
 msgstr "Prepíšte ľubovoľnú vypočítanú farbu"
 
-#: extension/lib/prefs/familyEditorPage.js:161
+#: extension/lib/prefs/familyEditorPage.js:166
 msgid "Back to automatic"
 msgstr "Späť na automatickú"
 
-#: extension/lib/prefs/familyEditorPage.js:179
+#: extension/lib/prefs/familyEditorPage.js:184
 #: extension/lib/prefs/familyListPage.js:82
 msgid "Custom"
 msgstr "Vlastná"
 
-#: extension/lib/prefs/familyEditorPage.js:179
+#: extension/lib/prefs/familyEditorPage.js:184
 msgid "Automatic"
 msgstr "Automatická"
 
-#: extension/lib/prefs/familyEditorPage.js:185
+#: extension/lib/prefs/familyEditorPage.js:190
 msgid "Terminal"
 msgstr "Terminál"
 
-#: extension/lib/prefs/familyEditorPage.js:190
+#: extension/lib/prefs/familyEditorPage.js:195
 msgid "Cursor"
 msgstr "Kurzor"
 
-#: extension/lib/prefs/familyEditorPage.js:191
+#: extension/lib/prefs/familyEditorPage.js:196
 msgid "Palette"
 msgstr "Paleta"
 
-#: extension/lib/prefs/familyEditorPage.js:191
+#: extension/lib/prefs/familyEditorPage.js:196
 msgid "16 ANSI colors"
 msgstr "16 farieb ANSI"
 
-#: extension/lib/prefs/familyEditorPage.js:193
+#: extension/lib/prefs/familyEditorPage.js:198
 #, javascript-format
 msgid "Color %d"
 msgstr "Farba %d"
 
-#: extension/lib/prefs/familyEditorPage.js:196
+#: extension/lib/prefs/familyEditorPage.js:201
 msgid "Reset from base colors"
 msgstr "Obnoviť zo základných farieb"
 
-#: extension/lib/prefs/familyEditorPage.js:203
+#: extension/lib/prefs/familyEditorPage.js:208
 msgid "Wallpaper"
 msgstr "Tapeta"
 
-#: extension/lib/prefs/familyEditorPage.js:206
+#: extension/lib/prefs/familyEditorPage.js:211
 msgid "Keep current wallpaper"
 msgstr "Ponechať aktuálnu tapetu"
 
-#: extension/lib/prefs/familyEditorPage.js:206
+#: extension/lib/prefs/familyEditorPage.js:211
 msgid "Solid color"
 msgstr "Jednofarebná"
 
-#: extension/lib/prefs/familyEditorPage.js:206
+#: extension/lib/prefs/familyEditorPage.js:211
 msgid "Gradient"
 msgstr "Prechod"
 
-#: extension/lib/prefs/familyEditorPage.js:206
+#: extension/lib/prefs/familyEditorPage.js:211
 msgid "Image file"
 msgstr "Obrázok"
 
-#: extension/lib/prefs/familyEditorPage.js:207
+#: extension/lib/prefs/familyEditorPage.js:212
 msgid "Type"
 msgstr "Typ"
 
-#: extension/lib/prefs/familyEditorPage.js:223
+#: extension/lib/prefs/familyEditorPage.js:228
 msgid "Color"
 msgstr "Farba"
 
-#: extension/lib/prefs/familyEditorPage.js:225
+#: extension/lib/prefs/familyEditorPage.js:230
 msgid "From"
 msgstr "Od"
 
-#: extension/lib/prefs/familyEditorPage.js:226
+#: extension/lib/prefs/familyEditorPage.js:231
 msgid "To"
 msgstr "Do"
 
-#: extension/lib/prefs/familyEditorPage.js:229
+#: extension/lib/prefs/familyEditorPage.js:234
 msgid "Image"
 msgstr "Obrázok"
 
-#: extension/lib/prefs/familyEditorPage.js:229
+#: extension/lib/prefs/familyEditorPage.js:234
 msgid "None selected"
 msgstr "Nič nie je vybraté"
 
-#: extension/lib/prefs/familyEditorPage.js:230
+#: extension/lib/prefs/familyEditorPage.js:235
 msgid "Choose…"
 msgstr "Vybrať…"
 
-#: extension/lib/prefs/familyEditorPage.js:242
+#: extension/lib/prefs/familyEditorPage.js:247
 msgid "Images"
 msgstr "Obrázky"
 
-#: extension/lib/prefs/familyEditorPage.js:244
+#: extension/lib/prefs/familyEditorPage.js:249
 msgid "Choose Wallpaper"
 msgstr "Vybrať tapetu"
 
-#: extension/lib/prefs/familyEditorPage.js:257
+#: extension/lib/prefs/familyEditorPage.js:262
 msgid "Icons"
 msgstr "Ikony"
 
-#: extension/lib/prefs/familyEditorPage.js:263
+#: extension/lib/prefs/familyEditorPage.js:268
 msgid "Keep current icons"
 msgstr "Ponechať aktuálne ikony"
 
-#: extension/lib/prefs/familyEditorPage.js:264
+#: extension/lib/prefs/familyEditorPage.js:269
 msgid "Icon theme"
 msgstr "Sada ikon"
 
-#: extension/lib/prefs/familyEditorPage.js:280
+#: extension/lib/prefs/familyEditorPage.js:285
 msgid "VS Code"
 msgstr "VS Code"
 
-#: extension/lib/prefs/familyEditorPage.js:281
+#: extension/lib/prefs/familyEditorPage.js:286
 msgid "VS Code switches to this color theme together with the desktop."
 msgstr "VS Code prepne na túto farebnú tému spolu s pracovnou plochou."
 
-#: extension/lib/prefs/familyEditorPage.js:287
+#: extension/lib/prefs/familyEditorPage.js:292
 msgid "Keep current VS Code theme"
 msgstr "Ponechať aktuálnu tému VS Code"
 
-#: extension/lib/prefs/familyEditorPage.js:288
+#: extension/lib/prefs/familyEditorPage.js:293
 msgid "Color theme"
 msgstr "Farebná téma"
 
@@ -372,5 +424,5 @@ msgid "Open theme menu"
 msgstr "Otvoriť ponuku tém"
 
 #: extension/lib/toggle.js:35
-msgid "Edit Themes…"
-msgstr "Upraviť témy…"
+msgid "Settings…"
+msgstr "Nastavenia…"

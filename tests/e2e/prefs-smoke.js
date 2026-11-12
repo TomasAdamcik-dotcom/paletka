@@ -33,6 +33,11 @@ if (mode === 'editor') {
     const family = store.loadAll().find(f => f.kind === 'custom' && f.id !== 'solarized');
     window.push_subpage(new FamilyEditorPage({family, store, fs, paths, window}));
 }
+if (mode === 'browsers') {
+    window.visible_page_name = 'browsers';
+    if (window.visible_page_name !== 'browsers')
+        throw new Error('no Browsers page');
+}
 window.connect('close-request', () => loop.quit());
 window.present();
 GLib.timeout_add(GLib.PRIORITY_DEFAULT, Number(seconds) * 1000, () => {

@@ -450,6 +450,21 @@ step('7g. Dark Style tile goes back to Ubuntu', () => {
     waitFor('Nord dark', () => ourStylesheets().join().endsWith('shell-nord-dark.css'));
 });
 
+step('7h. browsers: the menu opens Settings, switching a browser installs its host', () => {
+    const label = evalShell(`(() => {${FIND_TOGGLE}
+        return toggle.menu._getMenuItems().map(i => i.label?.text).filter(Boolean);
+    })()`);
+    assert(label.includes('Settings…'), `menu items: ${label}`);
+    const manifest = `${HOME}/.config/google-chrome/NativeMessagingHosts/io.github.adamciktomas.paletka.json`;
+    ext.set_strv('browsers', ['chrome']);
+    waitFor('chrome manifest', () => read(manifest)?.includes('chrome-extension://minabhiklmiljdidinhogbakhkcfbgji/'));
+    assert(GLib.file_test(`${DATA}/paletka/browser-host/paletka-host.js`, GLib.FileTest.IS_EXECUTABLE), 'host installed');
+    const current = JSON.parse(read(`${DATA}/paletka/current.json`));
+    assert(current.active === true && current.colors.background, `current.json: ${JSON.stringify(current)}`);
+    ext.set_strv('browsers', []);
+    waitFor('chrome manifest removed', () => read(manifest) === null);
+});
+
 step('8. back to Ubuntu restores everything', () => {
     selectFamily('Ubuntu');
     waitFor('foreign css restored', () => read(`${CONFIG}/gtk-4.0/gtk.css`) === FOREIGN_CSS);
@@ -465,7 +480,7 @@ step('8. back to Ubuntu restores everything', () => {
 
 if (GLib.getenv('E2E_PREFS') !== '0') {
     const extDir = `${DATA}/gnome-shell/extensions/${UUID}`;
-    for (const [mode, shot] of [['list', '07-prefs-list'], ['editor', '08-prefs-editor']]) {
+    for (const [mode, shot] of [['list', '07-prefs-list'], ['editor', '08-prefs-editor'], ['browsers', '08b-prefs-browsers']]) {
         step(`9. preferences ${mode} page renders without errors`, () => {
             const launcher = new Gio.SubprocessLauncher({
                 flags: Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE,

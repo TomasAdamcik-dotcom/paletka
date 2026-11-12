@@ -32,7 +32,7 @@ export const ThemeToggle = GObject.registerClass({
         this._section = new PopupMenu.PopupMenuSection();
         this.menu.addMenuItem(this._section);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        const edit = this.menu.addAction(_('Edit Themes…'), () => this.emit('edit-requested'));
+        const edit = this.menu.addAction(_('Settings…'), () => this.emit('edit-requested'));
         edit.add_style_class_name('paletka-edit');
 
         this.connect('clicked', () => {

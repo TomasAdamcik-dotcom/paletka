@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: paletka 1.0.1\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 13:41+0100\n"
+"POT-Creation-Date: 2026-11-12 14:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: extension/extension.js:229
+#: extension/extension.js:305 extension/extension.js:548
 msgid "Paletka"
 msgstr ""
 
-#: extension/extension.js:284
+#: extension/extension.js:366
 msgid "Theme changed"
 msgstr ""
 
-#: extension/extension.js:284
+#: extension/extension.js:366
 msgid "Open apps will use the new colors after they are reopened."
 msgstr ""
 
-#: extension/extension.js:378
+#: extension/extension.js:517
 msgid "Old color settings found"
 msgstr ""
 
-#: extension/extension.js:379
+#: extension/extension.js:518
 #, javascript-format
 msgid ""
 "%s pins light colors with the old @define-color syntax. Apps may be "
@@ -41,42 +41,90 @@ msgid ""
 "file if you see this."
 msgstr ""
 
-#: extension/extension.js:410
+#: extension/extension.js:533
 #, javascript-format
 msgid "VS Code theme for %s is not installed"
 msgstr ""
 
-#: extension/extension.js:411
+#: extension/extension.js:534
 msgid "Install it so VS Code switches together with the desktop theme."
 msgstr ""
 
-#: extension/extension.js:413
+#: extension/extension.js:537
 msgid "Install theme"
 msgstr ""
 
-#: extension/extension.js:423
+#: extension/extension.js:563
 msgid "VS Code theme was not installed"
 msgstr ""
 
-#: extension/extension.js:424
+#: extension/extension.js:564
 msgid "The VS Code command line (code) was not found."
 msgstr ""
 
-#: extension/extension.js:427
+#: extension/extension.js:567
 msgid "VS Code theme installed"
 msgstr ""
 
-#: extension/extension.js:427
+#: extension/extension.js:567
 msgid "VS Code now follows the desktop theme."
 msgstr ""
 
+#: extension/lib/prefs/browsersPage.js:18
+msgid "Off"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:19
+msgid "Install the Paletka extension in this browser"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:20
+msgid "Focus Firefox and allow Paletka in the system dialog"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:21
+msgid "Active"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:42
+msgid "Browsers"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:49
+msgid "Web pages"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:50
+msgid ""
+"Recolor web pages with the active theme. Each browser needs the Paletka "
+"browser extension."
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:55
+msgid "No supported browser found"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:60
+msgid "Get Extension"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:68
+msgid "Theme Chrome’s window"
+msgstr ""
+
+#: extension/lib/prefs/browsersPage.js:69
+msgid ""
+"Restarts Chrome with GTK 3 from now on. Also choose Appearance → Mode → GTK "
+"in Chrome’s settings."
+msgstr ""
+
 #: extension/lib/prefs/familyEditorPage.js:23
-#: extension/lib/prefs/familyEditorPage.js:189
+#: extension/lib/prefs/familyEditorPage.js:194
 msgid "Background"
 msgstr ""
 
 #: extension/lib/prefs/familyEditorPage.js:24
-#: extension/lib/prefs/familyEditorPage.js:188
+#: extension/lib/prefs/familyEditorPage.js:193
 msgid "Text"
 msgstr ""
 
@@ -97,12 +145,12 @@ msgid "Error"
 msgstr ""
 
 #: extension/lib/prefs/familyEditorPage.js:48 extension/lib/toggle.js:63
-#: extension/lib/toggle.js:81
+#: extension/lib/toggle.js:78
 msgid "Light"
 msgstr ""
 
 #: extension/lib/prefs/familyEditorPage.js:49 extension/lib/toggle.js:63
-#: extension/lib/toggle.js:81
+#: extension/lib/toggle.js:78
 msgid "Dark"
 msgstr ""
 
@@ -110,145 +158,145 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:134
+#: extension/lib/prefs/familyEditorPage.js:139
 msgid "Base colors"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:135
+#: extension/lib/prefs/familyEditorPage.js:140
 msgid "Everything else is derived from these six colors."
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:148
+#: extension/lib/prefs/familyEditorPage.js:153
 msgid "Advanced"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:150
+#: extension/lib/prefs/familyEditorPage.js:155
 msgid "Derived colors"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:151
+#: extension/lib/prefs/familyEditorPage.js:156
 msgid "Override any computed color"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:161
+#: extension/lib/prefs/familyEditorPage.js:166
 msgid "Back to automatic"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:179
+#: extension/lib/prefs/familyEditorPage.js:184
 #: extension/lib/prefs/familyListPage.js:82
 msgid "Custom"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:179
+#: extension/lib/prefs/familyEditorPage.js:184
 msgid "Automatic"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:185
+#: extension/lib/prefs/familyEditorPage.js:190
 msgid "Terminal"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:190
+#: extension/lib/prefs/familyEditorPage.js:195
 msgid "Cursor"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:191
+#: extension/lib/prefs/familyEditorPage.js:196
 msgid "Palette"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:191
+#: extension/lib/prefs/familyEditorPage.js:196
 msgid "16 ANSI colors"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:193
+#: extension/lib/prefs/familyEditorPage.js:198
 #, javascript-format
 msgid "Color %d"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:196
+#: extension/lib/prefs/familyEditorPage.js:201
 msgid "Reset from base colors"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:203
+#: extension/lib/prefs/familyEditorPage.js:208
 msgid "Wallpaper"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:206
+#: extension/lib/prefs/familyEditorPage.js:211
 msgid "Keep current wallpaper"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:206
+#: extension/lib/prefs/familyEditorPage.js:211
 msgid "Solid color"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:206
+#: extension/lib/prefs/familyEditorPage.js:211
 msgid "Gradient"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:206
+#: extension/lib/prefs/familyEditorPage.js:211
 msgid "Image file"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:207
+#: extension/lib/prefs/familyEditorPage.js:212
 msgid "Type"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:223
+#: extension/lib/prefs/familyEditorPage.js:228
 msgid "Color"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:225
+#: extension/lib/prefs/familyEditorPage.js:230
 msgid "From"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:226
+#: extension/lib/prefs/familyEditorPage.js:231
 msgid "To"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:229
+#: extension/lib/prefs/familyEditorPage.js:234
 msgid "Image"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:229
+#: extension/lib/prefs/familyEditorPage.js:234
 msgid "None selected"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:230
+#: extension/lib/prefs/familyEditorPage.js:235
 msgid "Choose…"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:242
+#: extension/lib/prefs/familyEditorPage.js:247
 msgid "Images"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:244
+#: extension/lib/prefs/familyEditorPage.js:249
 msgid "Choose Wallpaper"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:257
+#: extension/lib/prefs/familyEditorPage.js:262
 msgid "Icons"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:263
+#: extension/lib/prefs/familyEditorPage.js:268
 msgid "Keep current icons"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:264
+#: extension/lib/prefs/familyEditorPage.js:269
 msgid "Icon theme"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:280
+#: extension/lib/prefs/familyEditorPage.js:285
 msgid "VS Code"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:281
+#: extension/lib/prefs/familyEditorPage.js:286
 msgid "VS Code switches to this color theme together with the desktop."
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:287
+#: extension/lib/prefs/familyEditorPage.js:292
 msgid "Keep current VS Code theme"
 msgstr ""
 
-#: extension/lib/prefs/familyEditorPage.js:288
+#: extension/lib/prefs/familyEditorPage.js:293
 msgid "Color theme"
 msgstr ""
 
@@ -369,5 +417,5 @@ msgid "Open theme menu"
 msgstr ""
 
 #: extension/lib/toggle.js:35
-msgid "Edit Themes…"
+msgid "Settings…"
 msgstr ""
