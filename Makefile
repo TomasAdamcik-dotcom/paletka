@@ -12,7 +12,7 @@ schemas:
 zip: schemas
 	mkdir -p dist
 	gnome-extensions pack extension --force --out-dir=dist \
-		--extra-source=lib --extra-source=themes --extra-source=vendor --extra-source=../LICENSE \
+		--extra-source=lib --extra-source=themes --extra-source=vendor --extra-source=browser-host --extra-source=../LICENSE \
 		--podir=../po
 
 install: zip
