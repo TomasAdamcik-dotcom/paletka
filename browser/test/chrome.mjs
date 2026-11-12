@@ -45,6 +45,14 @@ export async function launch({palette = SOLARIZED_DARK} = {}) {
 
     const fixtures = path.join(root, 'test', 'fixtures');
     const server = http.createServer((req, res) => {
+        if (req.url === '/big.html') {
+            // 200 000 elements: 50 000 paragraphs with a link and two spans each.
+            const rows = Array.from({length: 50000}, (_, i) =>
+                `<p style="color:#222">Row ${i} <a href="#">link</a> <span>a</span><span style="color:#555">b</span></p>`);
+            res.writeHead(200, {'content-type': 'text/html; charset=utf-8'})
+                .end(`<!doctype html><title>big</title><body style="background:#fff">${rows.join('')}</body>`);
+            return;
+        }
         const file = path.join(fixtures, path.normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^(\.\.[/\\])+/, ''));
         if (!file.startsWith(fixtures) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
             res.writeHead(404).end();

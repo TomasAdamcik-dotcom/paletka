@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Components</title>
+<style>body { background: #fff; color: #000; font: 16px sans-serif; }</style>
+<script>
+  customElements.define('x-card', class extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({mode: 'open'}).innerHTML =
+        '<style>p { color: #111; } div { background: #fafafa; }</style><div><p id="inner">Inside a shadow root.</p></div>';
+    }
+  });
+</script></head>
+<body>
+  <x-card id="card"></x-card>
+  <p id="oklch" style="color: oklch(20% 0 0)">Text in oklch().</p>
+  <div id="list"></div>
+  <script>
+    setTimeout(() => {
+      const list = document.getElementById('list');
+      for (let i = 0; i < 100; i++) {
+        const p = document.createElement('p');
+        p.className = 'late';
+        p.style.color = '#333';
+        p.textContent = `Late item ${i}`;
+        list.append(p);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

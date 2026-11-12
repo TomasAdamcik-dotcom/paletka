@@ -32,4 +32,4 @@ browser:
 	cd browser && npm install --silent && node build.mjs
 
 browser-test: browser
-	cd browser && npx web-ext lint -s dist/firefox && node --test test/*.test.mjs
+	cd browser && npx web-ext lint -s dist/firefox && node --test --test-concurrency=1 test/*.test.mjs

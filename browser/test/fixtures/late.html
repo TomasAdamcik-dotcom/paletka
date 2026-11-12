@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Late styles</title>
+<style>
+  .icon { display: inline-block; width: 20px; height: 20px; background-color: #202122;
+    -webkit-mask-image: linear-gradient(#000, #000); mask-image: linear-gradient(#000, #000); }
+</style></head>
+<body>
+  <p id="text">The page background comes from a style added after loading.</p>
+  <span id="icon" class="icon"></span>
+  <script>
+    setTimeout(() => {
+      const style = document.createElement('style');
+      style.textContent = 'body { background: #fff; } #text { color: #202122; }';
+      document.head.append(style);
+    }, 600);
+  </script>
+</body>
+</html>
