@@ -71,3 +71,11 @@ test('chromeWindow: turning Paletka off removes the override', () => {
     applier.removeLeftovers();
     assertEq(fs.exists(user), false);
 });
+
+test('chromeWindow: when Chrome is gone, our launcher copy goes too', () => {
+    const {fs, paths, user} = env();
+    enableChromeWindow(fs, paths);
+    fs.remove(`${paths.home}/system-apps/${CHROME_DESKTOP}`);
+    assertEq(enableChromeWindow(fs, paths), 'missing');
+    assertEq(fs.exists(user), false);
+});

@@ -18,21 +18,35 @@ function stateText(state) {
         'off': _('Off'),
         'waiting': _('Install the Paletka extension in this browser'),
         'needs-permission': _('Focus Firefox and allow Paletka in the system dialog'),
+        'permission-denied': _('Paletka was not allowed to talk to Firefox'),
         'active': _('Active'),
     }[state];
 }
 
-// Whether the desktop portal lets the Firefox snap start Paletka's host.
-async function firefoxAllowed() {
+const STORE = ['org.freedesktop.impl.portal.PermissionStore', '/org/freedesktop/impl/portal/PermissionStore',
+    'org.freedesktop.impl.portal.PermissionStore'];
+
+// The desktop portal's answer for the Firefox snap: 'yes', 'no' or null.
+async function firefoxPermission() {
     try {
-        const reply = await Gio.DBus.session.call('org.freedesktop.impl.portal.PermissionStore',
-            '/org/freedesktop/impl/portal/PermissionStore', 'org.freedesktop.impl.portal.PermissionStore',
-            'Lookup', new GLib.Variant('(ss)', ['webextensions', HOST_NAME]),
+        const reply = await Gio.DBus.session.call(...STORE, 'Lookup',
+            new GLib.Variant('(ss)', ['webextensions', HOST_NAME]),
             new GLib.VariantType('(a{sas}v)'), Gio.DBusCallFlags.NONE, 1000, null);
         const [permissions] = reply.deepUnpack();
-        return (permissions['snap.firefox'] ?? []).includes('yes');
+        return permissions['snap.firefox']?.[0] ?? null;
     } catch {
-        return false;
+        return null;
+    }
+}
+
+// Forgets a "no", so Firefox asks again the next time it connects.
+async function resetFirefoxPermission() {
+    try {
+        await Gio.DBus.session.call(...STORE, 'DeletePermission',
+            new GLib.Variant('(sss)', ['webextensions', HOST_NAME, 'snap.firefox']),
+            null, Gio.DBusCallFlags.NONE, 1000, null);
+    } catch {
+        // Nothing stored: nothing to reset.
     }
 }
 
@@ -60,13 +74,19 @@ class BrowsersPage extends Adw.PreferencesPage {
             const button = new Gtk.Button({label: _('Get Extension'), valign: Gtk.Align.CENTER, visible: false});
             button.connect('clicked', () => Gio.AppInfo.launch_default_for_uri(browser.storeUrl, null));
             row.add_suffix(button);
+            const reset = new Gtk.Button({label: _('Ask Again'), valign: Gtk.Align.CENTER, visible: false});
+            reset.connect('clicked', async () => {
+                await resetFirefoxPermission();
+                this._refresh();
+            });
+            row.add_suffix(reset);
             group.add(row);
-            this._rows.push({browser, row, button});
+            this._rows.push({browser, row, button, reset});
 
             if (browser.id === 'chrome') {
                 const windowRow = new Adw.SwitchRow({
                     title: _('Theme Chrome’s window'),
-                    subtitle: _('Restarts Chrome with GTK 3 from now on. Also choose Appearance → Mode → GTK in Chrome’s settings.'),
+                    subtitle: _('Chrome starts with GTK 3 from now on. Also choose Appearance → Mode → GTK in Chrome’s settings.'),
                 });
                 settings.bind('chrome-window', windowRow, 'active', Gio.SettingsBindFlags.DEFAULT);
                 group.add(windowRow);
@@ -91,11 +111,12 @@ class BrowsersPage extends Adw.PreferencesPage {
     }
 
     async _refresh() {
-        const allowed = await firefoxAllowed();
-        for (const {browser, row, button} of this._rows) {
-            const state = hostState(this._fs, this._paths, browser, allowed);
+        const permission = await firefoxPermission();
+        for (const {browser, row, button, reset} of this._rows) {
+            const state = hostState(this._fs, this._paths, browser, permission);
             row.subtitle = stateText(state);
             button.visible = state === 'waiting';
+            reset.visible = state === 'permission-denied';
         }
     }
 });

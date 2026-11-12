@@ -18,8 +18,11 @@ export function enableChromeWindow(fs, paths) {
     const system = paths.systemApplicationsDirs
         .map(dir => fs.readText(`${dir}/${CHROME_DESKTOP}`))
         .find(text => text !== null);
-    if (system === undefined)
+    if (system === undefined) {
+        // Chrome was uninstalled: a launcher for it would not start anything.
+        disableChromeWindow(fs, paths);
         return 'missing';
+    }
     const current = fs.readText(userPath(paths));
     if (current !== null && !current.startsWith(HEADER))
         return 'conflict';

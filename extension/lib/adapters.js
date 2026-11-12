@@ -110,7 +110,8 @@ export class GioFs {
     // Modification time in milliseconds, or 0 when the file is missing.
     mtime(path) {
         try {
-            const info = Gio.File.new_for_path(path).query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null);
+            const info = Gio.File.new_for_path(path).query_info('time::modified,time::modified-usec',
+                Gio.FileQueryInfoFlags.NONE, null);
             return info.get_modification_date_time().to_unix_usec() / 1000;
         } catch {
             return 0;

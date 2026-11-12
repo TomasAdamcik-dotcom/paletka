@@ -59,11 +59,11 @@ test('browsers: removing leaves a foreign manifest with the same name alone', ()
 test('browsers: state goes from off to waiting to active', () => {
     const {paths, source} = env();
     const chrome = byId('chrome');
-    assertEq(hostState(fs, paths, chrome, true), 'off');
+    assertEq(hostState(fs, paths, chrome, 'yes'), 'off');
     installHost(fs, paths, chrome, source);
-    assertEq(hostState(fs, paths, chrome, true), 'waiting');
+    assertEq(hostState(fs, paths, chrome, 'yes'), 'waiting');
     fs.writeText(`${paths.browserHostDir}/seen-chrome.json`, JSON.stringify({version: '1.1.0', time: Date.now() + 1000}));
-    assertEq(hostState(fs, paths, chrome, true), 'active');
+    assertEq(hostState(fs, paths, chrome, 'yes'), 'active');
 });
 
 test('browsers: Firefox snap without the portal permission needs it', () => {
@@ -71,8 +71,8 @@ test('browsers: Firefox snap without the portal permission needs it', () => {
     fs.writeText(`${root}/snap/bin/firefox`, '');
     const firefox = detectBrowsers(fs, paths).find(b => b.id === 'firefox');
     installHost(fs, paths, firefox, source);
-    assertEq(hostState(fs, paths, firefox, false), 'needs-permission');
-    assertEq(hostState(fs, paths, firefox, true), 'waiting');
+    assertEq(hostState(fs, paths, firefox, null), 'needs-permission');
+    assertEq(hostState(fs, paths, firefox, 'yes'), 'waiting');
 });
 
 test('browsers: removeAllHosts removes every manifest of ours and the host', () => {
@@ -91,4 +91,43 @@ test('browsers: turning Paletka off removes the hosts', () => {
     applier.removeLeftovers();
     assertEq(fs.exists(manifestPath(paths, byId('chrome'))), false);
     assertEq(fs.exists(paths.browserHostDir), false);
+});
+
+test('browsers: Ubuntu Firefox (deb shim that runs the snap) counts as the snap', () => {
+    const {root, paths} = env();
+    fs.writeText(`${root}/bin/firefox`, '#!/bin/sh\nexec /snap/bin/firefox "$@"\n');
+    fs.writeText(`${root}/snap/bin/firefox`, '');
+    assertEq(detectBrowsers(fs, paths).find(b => b.id === 'firefox').snap, true);
+});
+
+test('browsers: a Chromium that is only the snap shim is not offered', () => {
+    const {root, paths} = env();
+    fs.writeText(`${root}/bin/chromium-browser`, '#!/bin/sh\nexec /snap/bin/chromium "$@"\n');
+    fs.writeText(`${root}/snap/bin/chromium`, '');
+    assertEq(detectBrowsers(fs, paths).map(b => b.id), []);
+});
+
+test('browsers: installing again does not touch unchanged files (other browsers stay active)', () => {
+    const {paths, source} = env();
+    const chrome = byId('chrome');
+    installHost(fs, paths, chrome, source);
+    const connect = Date.now() + 20;
+    while (Date.now() < connect)
+        ; // the extension connects a moment after the host was set up
+    fs.writeText(`${paths.browserHostDir}/seen-chrome.json`, JSON.stringify({version: '1.1.0', time: Date.now()}));
+    const later = Date.now() + 20;
+    while (Date.now() < later)
+        ; // the second install happens after the extension connected
+    installHost(fs, paths, chrome, source);
+    assertEq(hostState(fs, paths, chrome, 'yes'), 'active');
+});
+
+test('browsers: a denied Firefox permission is reported as denied', () => {
+    const {root, paths, source} = env();
+    fs.writeText(`${root}/snap/bin/firefox`, '');
+    const firefox = detectBrowsers(fs, paths).find(b => b.id === 'firefox');
+    installHost(fs, paths, firefox, source);
+    assertEq(hostState(fs, paths, firefox, 'no'), 'permission-denied');
+    assertEq(hostState(fs, paths, firefox, null), 'needs-permission');
+    assertEq(hostState(fs, paths, firefox, 'yes'), 'waiting');
 });

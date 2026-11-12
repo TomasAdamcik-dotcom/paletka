@@ -45,3 +45,12 @@ test('adapters: writeText can write an empty file', () => {
     fs.writeText(path, '');
     assertEq(fs.readText(path), '');
 });
+
+test('adapters: mtime has sub-second precision', () => {
+    const fs = new GioFs();
+    const path = `${tmpDir()}/f`;
+    fs.writeText(path, 'a');
+    const now = GLib.get_real_time() / 1000;
+    assert(Math.abs(fs.mtime(path) - now) < 500, `mtime ${fs.mtime(path)} vs ${now}`);
+    assert(fs.mtime(path) % 1000 !== 0 || fs.mtime(path) === Math.floor(now / 1000) * 1000, 'not truncated to seconds');
+});

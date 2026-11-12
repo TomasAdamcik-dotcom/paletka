@@ -87,6 +87,29 @@ test('backgrounds from styles added later are recolored; mask icons use the text
     await page.close();
 });
 
+test('inherited text deep in the page and in subtrees added later gets the full text color', async () => {
+    env.writePalette(SOLARIZED_DARK);
+    const page = await env.open('deep.html');
+    const fg = await cssColor(page, SOLARIZED_DARK.colors.foreground);
+    await waitInPage(page, want => getComputedStyle(document.getElementById('deep')).color === want, fg, 3000);
+    await waitInPage(page, want => getComputedStyle(document.getElementById('late-deep'))?.color === want, fg, 3000);
+    // Inheriting elements get no color of their own.
+    assert.equal(await page.evaluate(() => document.getElementById('section').style.color), '');
+    await page.close();
+});
+
+test('turning off restores the color scheme of a page without colors', async () => {
+    env.writePalette(SOLARIZED_DARK);
+    const page = await env.open('plain.html');
+    const fg = await cssColor(page, SOLARIZED_DARK.colors.foreground);
+    await waitInPage(page, want => getComputedStyle(document.getElementById('text')).color === want, fg);
+    env.writePalette({version: 1, active: false});
+    await waitInPage(page, () => getComputedStyle(document.getElementById('text')).color === 'rgb(0, 0, 0)', null, 1500);
+    assert.equal(await page.evaluate(() => document.documentElement.getAttribute('style') ?? ''), '');
+    env.writePalette(SOLARIZED_DARK);
+    await page.close();
+});
+
 test('a huge page is recolored in chunks without long freezes', async () => {
     env.writePalette(SOLARIZED_DARK);
     const page = await env.open('big.html');
@@ -100,5 +123,15 @@ test('a huge page is recolored in chunks without long freezes', async () => {
     await waitInPage(page, want => getComputedStyle(document.querySelector('p:last-of-type')).color === want, fg, 10000);
     const all = await page.evaluate(() => performance.getEntriesByName('paletka-chunk').map(e => e.duration));
     assert.ok(Math.max(...all) < 100, `longest chunk ${Math.max(...all)} ms`);
+    // A style added later makes Paletka look again, also in chunks.
+    await page.evaluate(() => {
+        const style = document.createElement('style');
+        style.textContent = 'span { background: #fafafa; }';
+        document.head.append(style);
+    });
+    await waitInPage(page, () => performance.getEntriesByName('paletka-recheck').length > 5, null, 10000);
+    await new Promise(r => setTimeout(r, 2000));
+    const rechecks = await page.evaluate(() => performance.getEntriesByName('paletka-recheck').map(e => e.duration));
+    assert.ok(Math.max(...rechecks) < 100, `longest recheck ${Math.max(...rechecks)} ms`);
     await page.close();
 });

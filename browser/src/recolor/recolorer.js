@@ -79,6 +79,12 @@ export class Recolorer {
         this._enqueue(this._collect(root, true));
         this._runChunk();
         // Only now: color-scheme changes the default text color of the page.
+        this._setColorScheme();
+    }
+
+    _setColorScheme() {
+        const root = this._doc.documentElement;
+        this._colorScheme ??= [root.style.getPropertyValue('color-scheme'), root.style.getPropertyPriority('color-scheme')];
         root.style.setProperty('color-scheme', this._dark ? 'dark' : 'light', 'important');
     }
 
@@ -99,29 +105,74 @@ export class Recolorer {
 
     // Styles that arrive later can give transparent elements a background (and
     // the page its base color): read those again and recolor.
+    // Runs in idle-time chunks like the first pass.
     _recheck() {
         if (!this._applied || !this._observer)
             return;
-        for (const el of this._touched) {
-            const info = this._info.get(el);
-            if (info.bg || el === this._doc.documentElement)
-                continue;
-            const bg = this._parse(getComputedStyle(el).backgroundColor);
-            if (bg)
-                info.bg = bg;
-        }
+        this._prune();
         const knew = this._baseKnown;
         this._readBase();
-        for (const el of this._touched) {
+        this._rewriteAll ||= !knew && this._baseKnown;
+        this._recheckQueue = [...this._touched];
+        this._runRecheck();
+    }
+
+    _runRecheck() {
+        if (!this._applied || !this._recheckQueue?.length)
+            return;
+        const start = performance.now();
+        const root = this._doc.documentElement;
+        // Read the whole chunk first, then write (as in the first pass).
+        const changed = [];
+        for (const el of this._recheckQueue.splice(0, this._chunkSize)) {
             const info = this._info.get(el);
-            if (!knew || info.bg)
-                this._write(el, info);
+            if (!info || !el.isConnected)
+                continue;
+            if (!info.bg && el !== root) {
+                const bg = this._parse(getComputedStyle(el).backgroundColor);
+                if (bg) {
+                    info.bg = bg;
+                    changed.push([el, info]);
+                    continue;
+                }
+            }
+            if (this._rewriteAll)
+                changed.push([el, info]);
+        }
+        for (const [el, info] of changed)
+            this._write(el, info);
+        performance.measure('paletka-recheck', {start});
+        if (this._recheckQueue.length)
+            this._idle(() => this._runRecheck());
+        else
+            this._rewriteAll = false;
+    }
+
+    _idle(fn) {
+        if (globalThis.requestIdleCallback)
+            requestIdleCallback(fn, {timeout: 200});
+        else
+            setTimeout(fn, 16);
+    }
+
+    // Elements the page removed are forgotten (long-lived pages add and
+    // remove many); if they come back they are read again.
+    _prune() {
+        for (const el of this._touched) {
+            if (!el.isConnected) {
+                this._touched.delete(el);
+                this._info.delete(el);
+            }
         }
     }
 
+    // After the next frame: the browser has then restyled the page for the new
+    // styles itself, so the recheck's reads do not force that work.
     _scheduleRecheck() {
         clearTimeout(this._recheckId);
-        this._recheckId = setTimeout(() => this._recheck(), 50);
+        this._recheckId = setTimeout(() => {
+            requestAnimationFrame(() => this._idle(() => this._recheck()));
+        }, 50);
     }
 
     update(palette) {
@@ -129,7 +180,9 @@ export class Recolorer {
         if (!this._applied)
             return;
         this._writeStyle();
-        this._doc.documentElement.style.setProperty('color-scheme', this._dark ? 'dark' : 'light', 'important');
+        if (this._observer)
+            this._setColorScheme();
+        this._prune();
         for (const el of this._touched)
             this._write(el, this._info.get(el));
     }
@@ -138,6 +191,7 @@ export class Recolorer {
         this._observer?.disconnect();
         this._observer = null;
         clearTimeout(this._recheckId);
+        this._recheckQueue = [];
         this._queue = [];
         for (const el of this._touched) {
             const info = this._info.get(el);
@@ -150,6 +204,17 @@ export class Recolorer {
             this._info.delete(el);
         }
         this._touched.clear();
+        if (this._colorScheme) {
+            const [value, priority] = this._colorScheme;
+            const root = this._doc.documentElement;
+            if (value)
+                root.style.setProperty('color-scheme', value, priority);
+            else
+                root.style.removeProperty('color-scheme');
+            if (!root.getAttribute('style'))
+                root.removeAttribute('style');
+            this._colorScheme = null;
+        }
         this._doc.getElementById(STYLE_ID)?.remove();
         this._applied = false;
     }
@@ -214,14 +279,10 @@ export class Recolorer {
         if (this._scheduled || !this._queue.length)
             return;
         this._scheduled = true;
-        const run = () => {
+        this._idle(() => {
             this._scheduled = false;
             this._runChunk();
-        };
-        if (globalThis.requestIdleCallback)
-            requestIdleCallback(run, {timeout: 200});
-        else
-            setTimeout(run, 16);
+        });
     }
 
     _runChunk() {
@@ -232,11 +293,14 @@ export class Recolorer {
         // Read everything first: writing first would make later reads see
         // colors this chunk has just changed.
         const read = [];
+        const pending = new Map(); // read in this chunk, not written yet
         for (const el of chunk) {
             if (!el.isConnected || this._info.has(el) || SKIP.has(el.tagName) ||
                 (el instanceof SVGElement && el.tagName.toLowerCase() !== 'svg'))
                 continue;
-            read.push([el, this._read(el)]);
+            const info = this._read(el, pending);
+            pending.set(el, info);
+            read.push([el, info]);
         }
         for (const [el, info] of read) {
             this._info.set(el, info);
@@ -250,12 +314,14 @@ export class Recolorer {
             performance.mark('paletka-done');
     }
 
-    _read(el) {
+    _read(el, pending) {
         const s = getComputedStyle(el);
         const parent = el.parentElement ?? el.parentNode?.host ?? null;
-        // A color equal to the one we wrote on the parent is inherited from it.
-        const written = parent && this._info.get(parent)?.wroteColor;
-        const inherited = written && s.color === getComputedStyle(parent).color;
+        // The parent already shows a theme color (we wrote it, or it inherits
+        // one): the same color here is inherited from it and needs nothing.
+        const parentInfo = parent && (this._info.get(parent) ?? pending.get(parent));
+        const themed = parentInfo && (parentInfo.wroteColor || parentInfo.inherited);
+        const inherited = !!themed && s.color === getComputedStyle(parent).color;
         const stops = s.backgroundImage.includes('gradient')
             ? (s.backgroundImage.match(COLOR_FN) ?? []).map(c => this._parse(c) ?? {r: 0, g: 0, b: 0, a: 0})
             : null;
@@ -266,6 +332,7 @@ export class Recolorer {
             // The page background is the style element's job.
             bg: el === this._doc.documentElement ? null : this._parse(s.backgroundColor),
             fg: inherited ? null : this._parse(s.color),
+            inherited,
             border: parseFloat(s.borderTopWidth) > 0 ? this._parse(s.borderTopColor) : null,
             neutralGradient: stops !== null && isNeutralGradient(stops),
             // Icons drawn with a mask show their background color like text.

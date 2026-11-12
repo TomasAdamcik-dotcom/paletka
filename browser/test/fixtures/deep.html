@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Deep</title>
+<style>body { background: #fff; color: #222; font: 16px sans-serif; }</style></head>
+<body>
+  <div id="filler"></div>
+  <script>
+    // More elements than one chunk, so the nested text below is read in a later chunk.
+    const filler = document.getElementById('filler');
+    for (let i = 0; i < 1500; i++)
+      filler.append(document.createElement('div'));
+  </script>
+  <div id="outer"><section id="section"><p id="deep">Inherited text past the first chunk.</p></section></div>
+  <div id="later"></div>
+  <script>
+    setTimeout(() => {
+      document.getElementById('later').innerHTML =
+        '<article><div><p id="late-deep">Inherited text added later.</p></div></article>';
+    }, 800);
+  </script>
+</body>
+</html>

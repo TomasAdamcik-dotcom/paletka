@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: paletka 1.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 14:40+0100\n"
+"POT-Creation-Date: 2026-11-12 15:25+0100\n"
 "PO-Revision-Date: 2026-11-02 12:00+0100\n"
 "Last-Translator: Tomas Adamcik\n"
 "Language-Team: Slovak\n"
@@ -16,23 +16,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: extension/extension.js:305 extension/extension.js:548
+#: extension/extension.js:323 extension/extension.js:566
 msgid "Paletka"
 msgstr "Paletka"
 
-#: extension/extension.js:366
+#: extension/extension.js:384
 msgid "Theme changed"
 msgstr "Téma zmenená"
 
-#: extension/extension.js:366
+#: extension/extension.js:384
 msgid "Open apps will use the new colors after they are reopened."
 msgstr "Otvorené aplikácie použijú nové farby po opätovnom spustení."
 
-#: extension/extension.js:517
+#: extension/extension.js:535
 msgid "Old color settings found"
 msgstr "Nájdené staré nastavenia farieb"
 
-#: extension/extension.js:518
+#: extension/extension.js:536
 #, javascript-format
 msgid ""
 "%s pins light colors with the old @define-color syntax. Apps may be "
@@ -43,33 +43,33 @@ msgstr ""
 "Ubuntu môžu byť aplikácie v tmavom režime nečitateľné. Ak to uvidíte, súbor "
 "presuňte alebo odstráňte."
 
-#: extension/extension.js:533
+#: extension/extension.js:551
 #, javascript-format
 msgid "VS Code theme for %s is not installed"
 msgstr "Téma VS Code pre %s nie je nainštalovaná"
 
-#: extension/extension.js:534
+#: extension/extension.js:552
 msgid "Install it so VS Code switches together with the desktop theme."
 msgstr ""
 "Nainštalujte ju, aby sa VS Code prepínal spolu s témou pracovnej plochy."
 
-#: extension/extension.js:537
+#: extension/extension.js:555
 msgid "Install theme"
 msgstr "Nainštalovať tému"
 
-#: extension/extension.js:563
+#: extension/extension.js:581
 msgid "VS Code theme was not installed"
 msgstr "Téma VS Code sa nenainštalovala"
 
-#: extension/extension.js:564
+#: extension/extension.js:582
 msgid "The VS Code command line (code) was not found."
 msgstr "Príkaz VS Code (code) sa nenašiel."
 
-#: extension/extension.js:567
+#: extension/extension.js:585
 msgid "VS Code theme installed"
 msgstr "Téma VS Code je nainštalovaná"
 
-#: extension/extension.js:567
+#: extension/extension.js:585
 msgid "VS Code now follows the desktop theme."
 msgstr "VS Code sa teraz prepína spolu s témou pracovnej plochy."
 
@@ -86,18 +86,22 @@ msgid "Focus Firefox and allow Paletka in the system dialog"
 msgstr "Prepnite sa do Firefoxu a povoľte Paletku v systémovom dialógu"
 
 #: extension/lib/prefs/browsersPage.js:21
+msgid "Paletka was not allowed to talk to Firefox"
+msgstr "Paletka nemá povolené komunikovať s Firefoxom"
+
+#: extension/lib/prefs/browsersPage.js:22
 msgid "Active"
 msgstr "Aktívne"
 
-#: extension/lib/prefs/browsersPage.js:42
+#: extension/lib/prefs/browsersPage.js:56
 msgid "Browsers"
 msgstr "Prehliadače"
 
-#: extension/lib/prefs/browsersPage.js:49
+#: extension/lib/prefs/browsersPage.js:63
 msgid "Web pages"
 msgstr "Webové stránky"
 
-#: extension/lib/prefs/browsersPage.js:50
+#: extension/lib/prefs/browsersPage.js:64
 msgid ""
 "Recolor web pages with the active theme. Each browser needs the Paletka "
 "browser extension."
@@ -105,24 +109,28 @@ msgstr ""
 "Prefarbí webové stránky aktívnou témou. Každý prehliadač potrebuje "
 "rozšírenie Paletka."
 
-#: extension/lib/prefs/browsersPage.js:55
+#: extension/lib/prefs/browsersPage.js:69
 msgid "No supported browser found"
 msgstr "Nenašiel sa žiadny podporovaný prehliadač"
 
-#: extension/lib/prefs/browsersPage.js:60
+#: extension/lib/prefs/browsersPage.js:74
 msgid "Get Extension"
 msgstr "Získať rozšírenie"
 
-#: extension/lib/prefs/browsersPage.js:68
+#: extension/lib/prefs/browsersPage.js:77
+msgid "Ask Again"
+msgstr "Opýtať sa znova"
+
+#: extension/lib/prefs/browsersPage.js:88
 msgid "Theme Chrome’s window"
 msgstr "Farbiť aj okno Chromu"
 
-#: extension/lib/prefs/browsersPage.js:69
+#: extension/lib/prefs/browsersPage.js:89
 msgid ""
-"Restarts Chrome with GTK 3 from now on. Also choose Appearance → Mode → GTK "
-"in Chrome’s settings."
+"Chrome starts with GTK 3 from now on. Also choose Appearance → Mode → GTK in "
+"Chrome’s settings."
 msgstr ""
-"Odteraz spúšťa Chrome s GTK 3. V nastaveniach Chromu zvoľte aj Vzhľad → "
+"Chrome sa odteraz spúšťa s GTK 3. V nastaveniach Chromu zvoľte aj Vzhľad → "
 "Režim → GTK."
 
 #: extension/lib/prefs/familyEditorPage.js:23
