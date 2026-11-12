@@ -11,6 +11,7 @@ import {yaruForScheme} from './backup.js';
 import {listVscodeThemes} from './vscodeThemes.js';
 import {sourceSchemeXml, sourceSchemeId} from './sourceScheme.js';
 import {isSystem} from './model.js';
+import {browserPalette, INACTIVE_PALETTE} from './browserPalette.js';
 
 export const ADW_GTK3_VERSION = '6.5';
 const ADW_GTK3_NAMES = ['adw-gtk3', 'adw-gtk3-dark'];
@@ -357,6 +358,8 @@ export class Applier {
 
         const shellCssPath = `${this._paths.shellCssDir}/shell-${family.id}-${variantName(isDark)}.css`;
         this._fs.writeText(shellCssPath, shellCss(resolveVariant(v, isDark), isDark));
+        // Read by the browser host; runs for every family and light/dark switch.
+        this._writeJson(this._paths.currentPalette, browserPalette(family, isDark));
         return {shellCssPath, warnings: this._takeWarnings()};
     }
 
@@ -366,7 +369,16 @@ export class Applier {
         return warnings;
     }
 
+    _writeJson(path, obj) {
+        try {
+            this._fs.writeText(path, `${JSON.stringify(obj)}\n`);
+        } catch (e) {
+            this._log(`cannot write ${path}: ${e.message}`);
+        }
+    }
+
     async restoreSystem(isDark, {restartServices}) {
+        this._writeJson(this._paths.currentPalette, INACTIVE_PALETTE);
         if (this._backup.has()) {
             this._backup.restore(isDark, this._log);
         } else {
@@ -438,6 +450,7 @@ export class Applier {
     // Files that stay useful while the extension is on but must not outlive it:
     // the Text Editor schemes and the adw-gtk3 copy we installed (unless in use).
     removeLeftovers() {
+        this._fs.remove(this._paths.currentPalette);
         for (const name of this._fs.listDir(this._paths.sourceStylesDir)) {
             if (name.startsWith('paletka-') && name.endsWith('.xml'))
                 this._fs.remove(`${this._paths.sourceStylesDir}/${name}`);

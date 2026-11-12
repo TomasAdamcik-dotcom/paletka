@@ -13,6 +13,7 @@ export function defaultPaths({
         gtk3Css: `${configDir}/gtk-3.0/gtk.css`,
         userConfigThemesDir: `${configDir}/paletka/themes`,
         backupDir: `${dataDir}/paletka/backup`,
+        currentPalette: `${dataDir}/paletka/current.json`,
         shellCssDir: `${cacheDir}/paletka`,
         wallpaperDir: `${dataDir}/backgrounds/paletka`,
         sourceStylesDir: `${dataDir}/gtksourceview-5/styles`,
