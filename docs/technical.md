@@ -156,6 +156,41 @@ is hooked so that clicking it while a custom family is active switches to `ubunt
   once per family per session; the source is destroyed in `disable()`;
 - "Theme changed" when open apps need a reopen.
 
+## Browsers (Paletka for web pages)
+
+Design: `docs/superpowers/specs/2026-11-12-browser-extension-design.md`.
+
+- `lib/browserPalette.js`: every `applyVariant` writes `~/.local/share/paletka/current.json`
+  (`{version, active, family, name, dark, colors: {background, surface, foreground, muted,
+  link, border, selection, accent, headerbar_bg, headerbar_fg}}`); Ubuntu writes
+  `{version: 1, active: false}`; turning off removes it.
+- `browser-host/paletka-host.js` (gjs) + `nativeMessaging.js`: native messaging host
+  `io.github.adamciktomas.paletka`. Sends `current.json` on connect and on every change
+  (`Gio.FileMonitor`), records `hello` from the extension in `browser-host/seen-<browser>.json`,
+  exits when the browser closes stdin, accepts nothing else.
+- `lib/browsers.js`: detects Chrome, Chromium (deb) and Firefox (deb or snap), copies the
+  host to `~/.local/share/paletka/browser-host/` and writes one manifest per browser
+  (`~/.config/google-chrome/NativeMessagingHosts/`, `~/.config/chromium/NativeMessagingHosts/`,
+  `~/.mozilla/native-messaging-hosts/`); removes only manifests pointing to its host.
+  State per browser: off / waiting / needs-permission (Firefox snap without the
+  `webextensions` permission in the portal permission store) / active.
+- Settings `browsers` (as) and `chrome-window` (b); the shell installs/removes on change and on
+  enable. `lib/chromeWindow.js` writes `~/.local/share/applications/google-chrome.desktop`
+  with `--gtk-version=3` (Chrome follows the GTK theme live only with GTK 3), never over a
+  launcher of the user.
+- `browser/`: WebExtension (MV3), one source, `manifest.chrome.json` (fixed `key`, ID
+  `minabhiklmiljdidinhogbakhkcfbgji`) and `manifest.firefox.json` (ID
+  `paletka@adamciktomas.github.io`, Firefox ≥ 140). `build.mjs` joins the content-script
+  modules into one file. Background: native port with backoff (2 s … 30 s), states
+  connecting / connected / no-host / needs-permission, broadcasts palettes to tabs, Firefox
+  `theme` API for the window. Content: `Recolorer` (computed styles; read before write per
+  chunk of 1000; viewport first, rest at idle; shadow roots; canvas color parsing; inherited
+  colors left alone; mask icons as text; neutral gradients dropped; late styles re-checked;
+  `revert()` restores inline styles).
+- Firefox snap: native messaging goes through the xdg-desktop-portal *WebExtensions* portal;
+  GNOME shows its permission dialog only for the focused app.
+- Known limits: pseudo-elements and `:hover` colors of recolored elements are not themed.
+
 ## Tests
 
 - `make test` — `gjs -m tests/run.js [filter]`, custom harness, fakes for settings and
@@ -167,9 +202,17 @@ is hooked so that clicking it while a custom family is active switches to `ubunt
   disable/enable restore, extension re-ordering, all families, Files restart while copying,
   Text Editor, restore, preferences). Screenshots go to `tests/e2e/out/`.
 
+Browser extension: `make browser-test` — `web-ext lint` for Firefox and `node:test` suites in
+real headless Chrome with Paletka's real host (live switching, fixtures for light/dark pages,
+shadow DOM, `oklch()`, late styles, mask icons, a 200 000-element page, per-site switches,
+popup). `browser/test/real-sites.mjs` screenshots real sites for a manual check. Firefox needs a
+manual check (snap portal permission).
+
 ## Build and release
 
 - `make zip` → `dist/paletka@adamciktomas.github.io.shell-extension.zip` (upload this to
   extensions.gnome.org).
 - `make install` installs the zip for the current user.
+- `make browser` builds `browser/dist/paletka-chrome.zip` and `paletka-firefox.zip`; the
+  Firefox one must be signed on addons.mozilla.org (`web-ext sign`) before release.
 - Version: `version-name` in `metadata.json` and the `po` headers.

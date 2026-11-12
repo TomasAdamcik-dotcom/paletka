@@ -52,6 +52,34 @@ Pre Gruvbox, Nord a Dracula ukáže Paletka pri prvom výbere upozornenie s tla�
 Terminálové aplikácie používajú 16 farieb terminálu. V Claude Code raz spusti
 `/theme dark-ansi` (alebo `light-ansi`) a odvtedy bude farby terminálu nasledovať.
 
+## Webové stránky
+
+Paletka vie prefarbiť aj webové stránky — biele aj tmavé — farbami aktívnej témy, v Google
+Chrome, Chromiu a Firefoxe. Stránky sa prefarbia hneď pri každej zmene témy aj svetlého/tmavého
+režimu.
+
+1. Otvor **Nastavenia…** na spodku menu Téma a prejdi na **Prehliadače**.
+2. Zapni svoj prehliadač. Riadok potom ukáže *Nainštalujte rozšírenie Paletka v tomto prehliadači*.
+3. Nainštaluj rozšírenie:
+   - **Chrome / Chromium:** stiahni `paletka-chrome.zip` z
+     [najnovšieho vydania](https://github.com/TomasAdamcik-dotcom/paletka/releases/latest) a
+     rozbaľ ho. Otvor `chrome://extensions`, zapni **Režim pre vývojárov**, klikni na
+     **Načítať rozbalené** a vyber rozbalený priečinok.
+   - **Firefox:** nainštaluj doplnok Paletka z najnovšieho vydania (`paletka-firefox.xpi`,
+     podpísaný Mozillou) tak, že súbor otvoríš vo Firefoxe.
+4. **Len Firefox zo snapu (Ubuntu):** prvýkrát sa Ubuntu opýta, či môže Firefox spustiť Paletku.
+   Otázka sa ukáže, len keď je Firefox aktívne okno — klikni do Firefoxu a zvoľ **Povoliť**.
+5. Riadok v Paletke ukáže **Aktívne**.
+
+Tlačidlo Paletka v paneli prehliadača ukáže aktívnu tému a má dva prepínače: *Recolor web
+pages* (všetky stránky) a *Recolor* + názov stránky (len táto stránka).
+
+**Okno Chromu:** pod Chromom zapni **Farbiť aj okno Chromu**, v Chrome raz zvoľ *Nastavenia →
+Vzhľad → Režim → GTK* a Chrome reštartuj. Firefox si okno prefarbí sám.
+
+Dobré vedieť: obrázky, videá a farebné prvky ako tlačidlá si farby nechajú. Niektoré detaily
+kreslené špeciálnym spôsobom (napríklad ozdobné prechody) môžu ostať svetlé.
+
 ## Vlastná téma
 
 Klikni na **Upraviť témy…** na spodku menu Téma (alebo otvor nastavenia Paletky v aplikácii
@@ -76,7 +104,7 @@ zdieľanie; **Importovať…** ju pridá.
 
 Vypnutie Paletky **vráti tvoj pôvodný vzhľad** — tvoje nastavenia GTK, tapetu, zvýraznenie,
 ikony, farby terminálu, schému Text Editora a nastavenia VS Code — a zmaže súbory, ktoré
-Paletka vytvorila. Vypnúť ju môžeš:
+Paletka vytvorila (aj prepojenie s prehliadačmi a kópiu spúšťača Chromu). Vypnúť ju môžeš:
 
 - v aplikácii **Rozšírenia** alebo **Extension Manager**,
 - na [extensions.gnome.org → Installed extensions](https://extensions.gnome.org/local/),

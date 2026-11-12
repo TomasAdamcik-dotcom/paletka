@@ -26,12 +26,22 @@ Or build and install from source with `make install`.
 Then log out and back in (Wayland loads new extensions only at login) and enable it with
 `gnome-extensions enable paletka@adamciktomas.github.io` (or in the Extensions app).
 
+## Web pages and browsers
+
+The **Paletka browser extension** recolors web pages with the active theme — white pages and
+dark ones — in Google Chrome, Chromium and Firefox, and follows every theme switch live.
+Firefox also gets the theme on its own window; Chrome's window can follow it too.
+
+1. Open **Settings…** in the Theme menu → **Browsers** and turn on your browser.
+2. Install the extension in that browser (see the [user guide](docs/user-guide.md#web-pages)).
+
 ## Turning it off and uninstalling
 
 > **Note:** turning Paletka off — in the Extensions app, in Extension Manager, on
 > extensions.gnome.org or with `gnome-extensions disable` — **restores your original look**:
 > your own `gtk.css`, GTK theme, wallpaper, accent, icon theme, terminal colors, Text Editor
-> scheme and VS Code settings come back, and the files Paletka generated are removed.
+> scheme and VS Code settings come back, and the files Paletka generated are removed
+> (including the browser host and Chrome's launcher copy).
 > Uninstalling turns the extension off first, so it restores everything the same way.
 >
 > Your theme choice is remembered: turning Paletka on again applies that theme again.
@@ -55,6 +65,8 @@ while it copies, moves, deletes or shows a dialog). Light/dark within a family i
 make test   # unit tests (gjs)
 make e2e    # headless nested GNOME Shell scenario with screenshots
 make zip    # build dist/*.shell-extension.zip
+make browser        # build browser/dist/{chrome,firefox} and their zips
+make browser-test   # web-ext lint + browser tests in real Chrome
 make pot    # refresh po/paletka.pot
 ```
 

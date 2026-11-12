@@ -53,6 +53,36 @@ installed, this part is skipped.
 Terminal apps use the terminal's 16 colors. For Claude Code run `/theme dark-ansi` (or
 `light-ansi`) once, and it follows the terminal colors from then on.
 
+## Web pages
+
+Paletka can recolor web pages too — white pages and dark ones — with the colors of the active
+theme, in Google Chrome, Chromium and Firefox. Pages follow every theme and light/dark switch
+right away.
+
+1. Open **Settings…** at the bottom of the Theme menu and go to **Browsers**.
+2. Turn on your browser. The row then says *Install the Paletka extension in this browser*.
+3. Install the extension:
+   - **Chrome / Chromium:** download `paletka-chrome.zip` from the
+     [latest release](https://github.com/TomasAdamcik-dotcom/paletka/releases/latest) and unpack
+     it. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick
+     the unpacked folder.
+   - **Firefox:** install the Paletka add-on from the latest release (`paletka-firefox.xpi`,
+     signed by Mozilla) by opening the file in Firefox.
+4. **Firefox from the Ubuntu snap only:** the first time, Ubuntu asks whether Firefox may start
+   Paletka. The question appears only while Firefox is the active window — click into Firefox
+   and choose **Allow**.
+5. The row in Paletka now says **Active**.
+
+The Paletka button in the browser toolbar shows the active theme and has two switches:
+*Recolor web pages* (all pages) and *Recolor this site*.
+
+**Chrome's window:** turn on **Theme Chrome's window** under Chrome, then in Chrome choose
+*Settings → Appearance → Mode → GTK* once and restart Chrome. Firefox colors its window by
+itself.
+
+Good to know: pictures, videos and colorful elements such as buttons keep their colors. A few
+details drawn with special techniques (for example decorative fades) can stay light.
+
 ## Creating your own theme
 
 Click **Edit Themes…** at the bottom of the Theme menu (or open Paletka's settings in the
@@ -77,7 +107,7 @@ file you can share; **Import…** adds one.
 
 Turning Paletka off **puts your original look back** — your own GTK settings, wallpaper,
 accent, icons, terminal colors, Text Editor scheme and VS Code settings — and removes the
-files Paletka created. You can turn it off in any of these places:
+files Paletka created (including the browser connection and Chrome's launcher copy). You can turn it off in any of these places:
 
 - the **Extensions** app or **Extension Manager**,
 - [extensions.gnome.org → Installed extensions](https://extensions.gnome.org/local/),
