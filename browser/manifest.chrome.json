@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Paletka",
+  "version": "1.1.0",
+  "description": "Recolors web pages with your Paletka desktop theme (needs the Paletka GNOME extension).",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqUMAO/TBwsky2boEr2cvMlZWqtke+nvv+luwGJoo61bKegsf2E/deb6OXD7uqFAibRlWv1CTcQY+NsZLLPY673EBLE6eXjQiN4KSEtuqF7Rkc8FvX5XZKJEhByULjHZvP54suJ94uTjmgoO4c2uGW70ttQlXGkC3LeUB/gRAL86ySqpeLeR0zUrioQjg7tZM43v9cHMbpTIzUciOud5p/MMN7oZUKBORKJyDX2Tep27dgiGPgPqEUmoQPdraP7803tLK0ulFZDXkR1zT7QmBoWUXWZYnjKKhZsS8YA/WoB8ajwL3eHx6yDEkzHc4dpsjuSFK/1PST4xTW7Zn9vYBbQIDAQAB",
+  "minimum_chrome_version": "120",
+  "permissions": ["nativeMessaging", "storage"],
+  "background": {"service_worker": "background.js", "type": "module"},
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_start",
+    "all_frames": true,
+    "match_about_blank": true
+  }],
+  "action": {"default_title": "Paletka"}
+}

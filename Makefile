@@ -1,7 +1,7 @@
 UUID := paletka@adamciktomas.github.io
 ZIP := dist/$(UUID).shell-extension.zip
 
-.PHONY: test schemas zip install e2e pot clean
+.PHONY: test schemas zip install e2e pot clean browser browser-test
 
 test:
 	gjs -m tests/run.js
@@ -27,3 +27,9 @@ pot:
 
 clean:
 	rm -rf dist extension/schemas/gschemas.compiled
+
+browser:
+	cd browser && npm install --silent && node build.mjs
+
+browser-test: browser
+	cd browser && npx web-ext lint -s dist/firefox && node --test test/*.test.mjs

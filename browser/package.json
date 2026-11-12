@@ -1,0 +1,16 @@
+{
+  "name": "paletka-browser",
+  "private": true,
+  "version": "1.1.0",
+  "description": "Paletka browser extension: recolors web pages with the active desktop theme",
+  "license": "GPL-2.0-or-later",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.17.0",
+    "web-ext": "^9.0.0"
+  }
+}
