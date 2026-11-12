@@ -12,15 +12,15 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const HOST_SCRIPT = path.resolve(root, '../extension/browser-host/paletka-host.js');
 const CHROME_ID = 'minabhiklmiljdidinhogbakhkcfbgji';
 
-export const SOLARIZED_DARK = {version: 1, active: true, family: 'solarized', dark: true, colors: {
+export const SOLARIZED_DARK = {version: 1, active: true, family: 'solarized', name: 'Solarized', dark: true, colors: {
     background: '#00252e', surface: '#0d3640', foreground: '#839496', muted: '#4f686c', link: '#7092a2',
     border: 'rgba(131, 148, 150, 0.15)', selection: 'rgba(38, 139, 210, 0.25)', accent: '#268bd2',
     headerbar_bg: '#073642', headerbar_fg: '#839496'}};
-export const NORD_DARK = {version: 1, active: true, family: 'nord', dark: true, colors: {
+export const NORD_DARK = {version: 1, active: true, family: 'nord', name: 'Nord', dark: true, colors: {
     background: '#2e3440', surface: '#3b4252', foreground: '#d8dee9', muted: '#99a0ac', link: '#88c0d0',
     border: 'rgba(216, 222, 233, 0.15)', selection: 'rgba(136, 192, 208, 0.25)', accent: '#88c0d0',
     headerbar_bg: '#3b4252', headerbar_fg: '#d8dee9'}};
-export const SOLARIZED_LIGHT = {version: 1, active: true, family: 'solarized', dark: false, colors: {
+export const SOLARIZED_LIGHT = {version: 1, active: true, family: 'solarized', name: 'Solarized', dark: false, colors: {
     background: '#fdf6e3', surface: '#eee8d5', foreground: '#586e75', muted: '#9fa59e', link: '#2075b5',
     border: 'rgba(88, 110, 117, 0.15)', selection: 'rgba(38, 139, 210, 0.25)', accent: '#268bd2',
     headerbar_bg: '#eee8d5', headerbar_fg: '#586e75'}};

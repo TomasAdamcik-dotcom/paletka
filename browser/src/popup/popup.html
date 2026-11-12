@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Paletka</title>
+  <link rel="stylesheet" href="popup.css">
+  <script type="module" src="popup.js"></script>
+</head>
+<body>
+  <h1>Paletka</h1>
+  <p id="status" role="status">Connecting to Paletka…</p>
+  <label class="row">
+    <span>Recolor web pages</span>
+    <input id="enabled" type="checkbox" role="switch" checked>
+  </label>
+  <label class="row" id="site-row" hidden>
+    <span>Recolor <strong id="site"></strong></span>
+    <input id="site-enabled" type="checkbox" role="switch" checked>
+  </label>
+</body>
+</html>

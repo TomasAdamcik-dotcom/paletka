@@ -9,7 +9,7 @@ test('browserPalette: colors come from the resolved palette', () => {
     const {sol} = setup();
     const p = browserPalette(sol, true);
     const r = resolveVariant(sol.dark, true);
-    assertEq([p.version, p.active, p.family, p.dark], [1, true, 'solarized', true]);
+    assertEq([p.version, p.active, p.family, p.name, p.dark], [1, true, 'solarized', 'Solarized', true]);
     assertEq(p.colors.background, '#00252e');
     assertEq(p.colors.foreground, '#839496');
     assertEq(p.colors.surface, r.card_bg);

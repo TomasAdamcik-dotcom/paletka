@@ -8,7 +8,7 @@ import path from 'node:path';
 const root = path.dirname(new URL(import.meta.url).pathname);
 const src = path.join(root, 'src');
 const CONTENT = ['recolor/colors.js', 'recolor/mapping.js', 'recolor/recolorer.js', 'content/main.js'];
-const COPY = ['background.js', 'connection.js'];
+const COPY = ['background.js', 'connection.js', 'firefoxTheme.js'];
 const DIRS = ['popup', 'icons'];
 
 // Each module keeps its own scope; only its exports reach the next ones.

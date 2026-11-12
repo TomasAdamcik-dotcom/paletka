@@ -25,9 +25,12 @@ async function start() {
     show(palette);
 }
 
-api.runtime.onMessage.addListener(msg => {
+api.runtime.onMessage.addListener((msg, _sender, reply) => {
     if (msg?.type === 'palette')
         show(msg.palette);
+    else if (msg?.type === 'site')
+        reply({site: location.hostname});
+    return false;
 });
 api.storage.onChanged.addListener((changes, area) => {
     if (area === 'sync' && (changes.disabledSites || changes.enabled))

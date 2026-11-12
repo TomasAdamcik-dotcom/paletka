@@ -10,6 +10,7 @@ export function browserPalette(family, isDark) {
         version: 1,
         active: true,
         family: family.id,
+        name: family.name,
         dark: isDark,
         colors: {
             background: p.view_bg,

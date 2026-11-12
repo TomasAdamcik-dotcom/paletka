@@ -1,0 +1,23 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #59636e;
+  --accent: #0969da;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1e1e1e; --fg: #e6e6e6; --muted: #a0a0a0; --accent: #78aeed; }
+}
+body {
+  margin: 0;
+  padding: 12px 16px 14px;
+  min-width: 260px;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.4 system-ui, sans-serif;
+}
+h1 { font-size: 15px; margin: 0 0 4px; }
+#status { color: var(--muted); margin: 0 0 12px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; }
+.row[hidden] { display: none; }
+input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; }

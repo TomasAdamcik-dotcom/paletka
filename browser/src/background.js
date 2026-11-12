@@ -1,6 +1,7 @@
 // Keeps the connection to Paletka's native host, remembers the latest palette
 // and passes it to every tab. The open port also keeps the service worker alive.
 import {HOST, retryDelay, classifyFailure, browserId} from './connection.js';
+import {firefoxThemeFor} from './firefoxTheme.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const isFirefox = typeof globalThis.browser !== 'undefined' && !!api.runtime.getBrowserInfo;
@@ -20,7 +21,18 @@ function setState(next) {
         listener();
 }
 
+// Firefox's own window follows the theme too (Chrome has no such API).
+function themeBrowser() {
+    if (!api.theme?.update)
+        return;
+    if (palette?.active)
+        api.theme.update(firefoxThemeFor(palette));
+    else
+        api.theme.reset();
+}
+
 async function broadcast() {
+    themeBrowser();
     await storage.set({palette});
     for (const tab of await api.tabs.query({}))
         api.tabs.sendMessage(tab.id, {type: 'palette', palette}).catch(() => {});
