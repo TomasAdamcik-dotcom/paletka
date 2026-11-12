@@ -38,6 +38,9 @@ export function setup({missingSchemas = [], foreignCss = true, defaultKeys = [],
     const root = tmpDir();
     const paths = defaultPaths({configDir: `${root}/config`, dataDir: `${root}/data`, cacheDir: `${root}/cache`});
     paths.iconDirs = [`${root}/icons`];
+    // Never the real home: browser host manifests live there.
+    paths.home = `${root}/home`;
+    paths.binDirs = [`${root}/bin`];
     for (const n of ['Yaru', 'Yaru-dark'])
         fs.writeText(`${root}/icons/${n}/index.theme`, '[Icon Theme]\n');
     if (foreignCss)

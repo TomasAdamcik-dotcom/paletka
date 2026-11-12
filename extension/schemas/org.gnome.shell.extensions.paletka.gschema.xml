@@ -13,5 +13,13 @@
       <default>true</default>
       <summary>Restart background GTK services after switching theme families</summary>
     </key>
+    <key name="browsers" type="as">
+      <default>[]</default>
+      <summary>Browsers whose Paletka extension gets the theme colors</summary>
+    </key>
+    <key name="chrome-window" type="b">
+      <default>false</default>
+      <summary>Start Google Chrome with GTK 3 so its window follows the theme</summary>
+    </key>
   </schema>
 </schemalist>

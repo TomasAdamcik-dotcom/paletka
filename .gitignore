@@ -2,3 +2,6 @@ dist/
 extension/schemas/gschemas.compiled
 tests/e2e/out/
 .superpowers/
+browser/chrome-key.pem
+browser/dist/
+browser/node_modules/

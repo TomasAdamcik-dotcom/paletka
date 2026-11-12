@@ -12,6 +12,7 @@ import {listVscodeThemes} from './vscodeThemes.js';
 import {sourceSchemeXml, sourceSchemeId} from './sourceScheme.js';
 import {isSystem} from './model.js';
 import {browserPalette, INACTIVE_PALETTE} from './browserPalette.js';
+import {removeAllHosts} from './browsers.js';
 
 export const ADW_GTK3_VERSION = '6.5';
 const ADW_GTK3_NAMES = ['adw-gtk3', 'adw-gtk3-dark'];
@@ -451,6 +452,7 @@ export class Applier {
     // the Text Editor schemes and the adw-gtk3 copy we installed (unless in use).
     removeLeftovers() {
         this._fs.remove(this._paths.currentPalette);
+        removeAllHosts(this._fs, this._paths);
         for (const name of this._fs.listDir(this._paths.sourceStylesDir)) {
             if (name.startsWith('paletka-') && name.endsWith('.xml'))
                 this._fs.remove(`${this._paths.sourceStylesDir}/${name}`);

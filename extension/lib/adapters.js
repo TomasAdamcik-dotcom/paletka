@@ -39,7 +39,11 @@ export class GioFs {
         } catch {
             // New file: default permissions.
         }
-        file.replace_contents(encoder.encode(text), null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+        if (text === '')
+            // replace_contents() rejects empty contents.
+            file.replace(null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null).close(null);
+        else
+            file.replace_contents(encoder.encode(text), null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
         if (mode !== null)
             file.set_attribute_uint32('unix::mode', mode, Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, null);
     }
@@ -97,6 +101,20 @@ export class GioFs {
     symlink(target, path) {
         this.mkdirp(GLib.path_get_dirname(path));
         Gio.File.new_for_path(path).make_symbolic_link(target, null);
+    }
+
+    setMode(path, mode) {
+        Gio.File.new_for_path(path).set_attribute_uint32('unix::mode', mode, Gio.FileQueryInfoFlags.NONE, null);
+    }
+
+    // Modification time in milliseconds, or 0 when the file is missing.
+    mtime(path) {
+        try {
+            const info = Gio.File.new_for_path(path).query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null);
+            return info.get_modification_date_time().to_unix_usec() / 1000;
+        } catch {
+            return 0;
+        }
     }
 
     copyFile(src, dest) {

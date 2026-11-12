@@ -38,3 +38,10 @@ test('adapters: writeText keeps the permissions of an existing file', () => {
     const mode = Gio.File.new_for_path(path).query_info('unix::mode', 0, null).get_attribute_uint32('unix::mode');
     assertEq(mode & 0o777, 0o600);
 });
+
+test('adapters: writeText can write an empty file', () => {
+    const fs = new GioFs();
+    const path = `${tmpDir()}/empty`;
+    fs.writeText(path, '');
+    assertEq(fs.readText(path), '');
+});
