@@ -21,7 +21,11 @@ export class Recolorer {
         this._info = new WeakMap(); // element -> original colors and inline values
         this._touched = new Set();
         this._queue = [];
+        this._removed = [];
         this._scheduled = false;
+        this._recheckId = 0;
+        this._lastRecheck = -Infinity;
+        this._recheckGap = 0;
         this._observer = null;
         this._applied = false;
         this._setPalette(palette);
@@ -109,6 +113,11 @@ export class Recolorer {
     _recheck() {
         if (!this._applied || !this._observer)
             return;
+        // Pages that keep adding styles (CSS-in-JS) are looked at less and
+        // less often; after a quiet while, right away again.
+        const now = performance.now();
+        this._recheckGap = now - this._lastRecheck < 5000 ? Math.min(Math.max(2 * this._recheckGap, 1000), 30000) : 0;
+        this._lastRecheck = now;
         this._prune();
         const knew = this._baseKnown;
         this._readBase();
@@ -169,10 +178,32 @@ export class Recolorer {
     // After the next frame: the browser has then restyled the page for the new
     // styles itself, so the recheck's reads do not force that work.
     _scheduleRecheck() {
-        clearTimeout(this._recheckId);
+        if (this._recheckId)
+            return;
+        const wait = Math.max(50, this._lastRecheck + this._recheckGap - performance.now());
         this._recheckId = setTimeout(() => {
+            this._recheckId = 0;
             requestAnimationFrame(() => this._idle(() => this._recheck()));
-        }, 50);
+        }, wait);
+    }
+
+    // Removed elements are forgotten once the page is idle, unless they came
+    // back (a move): long-lived pages remove many, and kept they would stay
+    // in memory.
+    _forgetRemoved() {
+        const removed = this._removed;
+        this._removed = [];
+        const forget = el => {
+            if (this._touched.delete(el))
+                this._info.delete(el);
+        };
+        for (const node of removed) {
+            if (node.isConnected)
+                continue;
+            forget(node);
+            for (const el of node.querySelectorAll('*'))
+                forget(el);
+        }
     }
 
     update(palette) {
@@ -191,8 +222,10 @@ export class Recolorer {
         this._observer?.disconnect();
         this._observer = null;
         clearTimeout(this._recheckId);
+        this._recheckId = 0;
         this._recheckQueue = [];
         this._queue = [];
+        this._removed = [];
         for (const el of this._touched) {
             const info = this._info.get(el);
             for (const [prop, [value, priority]] of Object.entries(info.inline)) {
@@ -252,6 +285,10 @@ export class Recolorer {
     _onMutations(records) {
         const added = [];
         for (const record of records) {
+            for (const node of record.removedNodes) {
+                if (node.nodeType === 1)
+                    this._removed.push(node);
+            }
             for (const node of record.addedNodes) {
                 if (node.nodeName === 'STYLE' && node.id !== STYLE_ID)
                     this._scheduleRecheck();
@@ -266,6 +303,13 @@ export class Recolorer {
         if (added.length) {
             this._enqueue(added);
             this._schedule();
+        }
+        if (this._removed.length && !this._forgetScheduled) {
+            this._forgetScheduled = true;
+            this._idle(() => {
+                this._forgetScheduled = false;
+                this._forgetRemoved();
+            });
         }
     }
 

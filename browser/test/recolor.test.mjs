@@ -135,3 +135,72 @@ test('a huge page is recolored in chunks without long freezes', async () => {
     assert.ok(Math.max(...rechecks) < 100, `longest recheck ${Math.max(...rechecks)} ms`);
     await page.close();
 });
+
+const domNodes = async page => {
+    const cdp = await page.createCDPSession();
+    await cdp.send('HeapProfiler.collectGarbage');
+    await cdp.send('Performance.enable');
+    const {metrics} = await cdp.send('Performance.getMetrics');
+    await cdp.detach();
+    return metrics.find(m => m.name === 'Nodes').value;
+};
+
+test('elements a long-lived page removes are not kept in memory', async () => {
+    env.writePalette(SOLARIZED_DARK);
+    const page = await env.open('plain.html');
+    await done(page);
+    // A chat: old messages go, new ones come, all the time.
+    await page.evaluate(() => {
+        let n = 0;
+        const add = () => {
+            const m = document.createElement('div');
+            m.innerHTML = `<p style="color:#222">Message ${n++}</p><span style="color:#666">12:00</span>`;
+            document.body.append(m);
+        };
+        for (let i = 0; i < 1000; i++)
+            add();
+        window.churn = setInterval(() => {
+            for (let i = 0; i < 50; i++) {
+                document.body.firstElementChild?.remove();
+                add();
+            }
+        }, 50);
+    });
+    await new Promise(r => setTimeout(r, 3000));
+    const early = await domNodes(page);
+    await new Promise(r => setTimeout(r, 6000));
+    const late = await domNodes(page);
+    await page.evaluate(() => clearInterval(window.churn));
+    assert.ok(late < early * 1.5, `DOM nodes grew from ${early} to ${late}`);
+    await page.close();
+});
+
+test('a page that keeps adding styles costs little time', async () => {
+    env.writePalette(SOLARIZED_DARK);
+    const page = await env.open('plain.html');
+    await page.evaluate(() => {
+        for (let i = 0; i < 5000; i++) {
+            const d = document.createElement('div');
+            d.innerHTML = `<p style="color:#222">Row ${i} <a href="#">x</a> <span>y</span></p>`;
+            document.body.append(d);
+        }
+    });
+    await new Promise(r => setTimeout(r, 2000));
+    const spent = () => page.evaluate(() => performance.getEntriesByName('paletka-recheck').reduce((s, e) => s + e.duration, 0));
+    // CSS-in-JS: a new style element every 100 ms, for as long as the page is open.
+    await page.evaluate(() => {
+        let n = 0;
+        window.css = setInterval(() => {
+            const s = document.createElement('style');
+            s.textContent = `.c${n++} { background: #fafafa; }`;
+            document.head.append(s);
+        }, 100);
+    });
+    await new Promise(r => setTimeout(r, 4000));
+    const before = await spent();
+    await new Promise(r => setTimeout(r, 10000));
+    await page.evaluate(() => clearInterval(window.css));
+    const ms = await spent() - before;
+    assert.ok(ms < 10000 * 0.02, `rechecks took ${ms.toFixed(0)} ms in 10 s`);
+    await page.close();
+});
