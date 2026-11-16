@@ -14,9 +14,37 @@ mkdir -p "$OUT"
 
 # Wayland socket paths are limited to 108 bytes: keep the environment short.
 E2E="$(mktemp -d "/run/user/$(id -u)/dt-e2e-XXXX")"
+# Processes of the nested session: they all carry $E2E in their environment
+# (XDG_RUNTIME_DIR), not always in their command line.
+# (The grep below matches itself; it is gone once the list is read.)
+e2e_pids() {
+    local pid
+    for pid in $(grep -alsF "$E2E/" /proc/[0-9]*/environ 2>/dev/null | cut -d/ -f3); do
+        [ -d "/proc/$pid" ] && echo "$pid"
+    done
+    return 0
+}
+stop_leftovers() {
+    local pids
+    pids="$(e2e_pids)"
+    [ -n "$pids" ] || return 0
+    kill $pids 2>/dev/null || true
+    for _ in $(seq 1 20); do
+        pids="$(e2e_pids)"
+        [ -n "$pids" ] || return 0
+        sleep 0.25
+    done
+    # A shell that lost its D-Bus and runtime dir ignores SIGTERM.
+    for _ in $(seq 1 8); do
+        kill -9 $pids 2>/dev/null || true
+        sleep 0.25
+        pids="$(e2e_pids)"
+        [ -n "$pids" ] || return 0
+    done
+}
 cleanup() {
-    # Helpers started by the nested session (gvfsd, wsdd) would outlive it.
-    pkill -f "$E2E" 2>/dev/null || true
+    # gnome-shell, gvfsd, wsdd and friends would outlive the nested session.
+    stop_leftovers
     for m in $(mount | awk -v d="$E2E" 'index($3, d) == 1 {print $3}'); do
         fusermount3 -u "$m" 2>/dev/null || fusermount -u "$m" 2>/dev/null || true
     done
@@ -86,6 +114,7 @@ dbus-run-session -- bash -c '
     gnome-shell --headless --wayland --no-x11 --mode=ubuntu --virtual-monitor 1600x1000 \
         > "$E2E_OUT/shell.log" 2>&1 &
     SHELL_PID=$!
+    trap "kill $SHELL_PID 2>/dev/null" EXIT
     for _ in $(seq 1 60); do
         gdbus call --session -d org.gnome.Shell -o /org/gnome/Shell \
             -m org.freedesktop.DBus.Properties.Get org.gnome.Shell ShellVersion >/dev/null 2>&1 && break
@@ -100,6 +129,13 @@ dbus-run-session -- bash -c '
     exit $STATUS
 ' > "$OUT/session.log" 2>&1
 STATUS=$?
+stop_leftovers
+LEFT="$(e2e_pids)"
+if [ -n "$LEFT" ]; then
+    echo "FAIL: processes of the nested session still run:"
+    ps -o pid,cmd -p $LEFT
+    STATUS=1
+fi
 cat "$OUT/scenario.txt" 2>/dev/null
 grep -E "paletka|Paletka|JS ERROR" "$OUT/shell.log" > "$OUT/extension-log.txt" || true
 echo "artifacts: $OUT"
