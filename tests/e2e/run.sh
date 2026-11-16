@@ -14,6 +14,26 @@ mkdir -p "$OUT"
 
 # Wayland socket paths are limited to 108 bytes: keep the environment short.
 E2E="$(mktemp -d "/run/user/$(id -u)/dt-e2e-XXXX")"
+
+# The nested session runs in its own systemd scope: stopping the scope stops
+# everything in it, and systemd stops it after MAX_RUNTIME even when this
+# script is killed with SIGKILL. The fake systemctl and the nested runtime
+# dir come later, so the real ones are kept here.
+SYSTEMCTL="$(command -v systemctl || true)"
+USER_RUNTIME="/run/user/$(id -u)"
+SCOPE="paletka-e2e-$$-${E2E##*-}"
+MAX_RUNTIME=15min
+user_systemd() {
+    XDG_RUNTIME_DIR="$USER_RUNTIME" DBUS_SESSION_BUS_ADDRESS="unix:path=$USER_RUNTIME/bus" "$@"
+}
+# Unmounts what the session mounted there (the document portal) and removes it.
+remove_run_dir() {
+    for m in $(mount | awk -v d="$1" 'index($3, d) == 1 {print $3}'); do
+        fusermount3 -u "$m" 2>/dev/null || fusermount -u "$m" 2>/dev/null || true
+    done
+    rm -rf "$1" 2>/dev/null || true
+}
+USE_SCOPE=false
 # Processes of the nested session: they all carry $E2E in their environment
 # (XDG_RUNTIME_DIR), not always in their command line.
 # (The grep below matches itself; it is gone once the list is read.)
@@ -44,13 +64,31 @@ stop_leftovers() {
 }
 cleanup() {
     # gnome-shell, gvfsd, wsdd and friends would outlive the nested session.
+    if $USE_SCOPE; then
+        user_systemd "$SYSTEMCTL" --user stop "$SCOPE.scope" 2>/dev/null || true
+    fi
     stop_leftovers
-    for m in $(mount | awk -v d="$E2E" 'index($3, d) == 1 {print $3}'); do
-        fusermount3 -u "$m" 2>/dev/null || fusermount -u "$m" 2>/dev/null || true
-    done
-    rm -rf "$E2E"
+    remove_run_dir "$E2E"
 }
 trap cleanup EXIT
+if [ -n "$SYSTEMCTL" ] && user_systemd systemd-run --user --scope --quiet true 2>/dev/null; then
+    USE_SCOPE=true
+    # Earlier runs killed before their cleanup: stop their scopes when their
+    # script is gone, then remove every run dir without a running scope.
+    scopes() {
+        user_systemd "$SYSTEMCTL" --user list-units --plain --no-legend 'paletka-e2e-*.scope' | awk '{print $1}'
+    }
+    for unit in $(scopes); do
+        pid="${unit#paletka-e2e-}"
+        pid="${pid%%-*}"
+        [ -d "/proc/$pid" ] || user_systemd "$SYSTEMCTL" --user stop "$unit" 2>/dev/null || true
+    done
+    running="$(scopes)"
+    for dir in "$USER_RUNTIME"/dt-e2e-*; do
+        [ -d "$dir" ] && [ "$dir" != "$E2E" ] || continue
+        grep -q -- "-${dir##*-}\.scope$" <<< "$running" || remove_run_dir "$dir"
+    done
+fi
 mkdir -p "$E2E"/{config,data,cache,runtime}
 chmod 700 "$E2E/runtime"
 
@@ -96,8 +134,15 @@ export XDG_CONFIG_HOME="$E2E/config" XDG_DATA_HOME="$E2E/data" XDG_CACHE_HOME="$
 export GIO_USE_VFS=local GVFS_DISABLE_FUSE=1
 unset WAYLAND_DISPLAY DISPLAY DBUS_SESSION_BUS_ADDRESS
 
+IN_SCOPE=()
+if $USE_SCOPE; then
+    IN_SCOPE=(env XDG_RUNTIME_DIR="$USER_RUNTIME" DBUS_SESSION_BUS_ADDRESS="unix:path=$USER_RUNTIME/bus"
+        systemd-run --user --scope --quiet --collect --unit="$SCOPE" -p RuntimeMaxSec="$MAX_RUNTIME"
+        env -u DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR")
+fi
+
 set +e
-dbus-run-session -- bash -c '
+"${IN_SCOPE[@]}" dbus-run-session -- bash -c '
     set -e
     gsettings set org.gnome.shell disable-user-extensions false
     gsettings set org.gnome.shell enabled-extensions "[\"$E2E_UUID\", \"helper@paletka.test\"]"
