@@ -5,6 +5,7 @@
 // closes its end. It reads nothing else and accepts no other requests.
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import GioUnix from 'gi://GioUnix';
 
 import {encodeMessage, MessageReader} from './nativeMessaging.js';
 
@@ -14,8 +15,8 @@ const INACTIVE = {version: 1, active: false};
 const BROWSERS = ['chrome', 'chromium', 'firefox'];
 
 const loop = new GLib.MainLoop(null, false);
-const output = new Gio.UnixOutputStream({fd: 1, close_fd: false});
-const input = new Gio.UnixInputStream({fd: 0, close_fd: false});
+const output = new GioUnix.OutputStream({fd: 1, close_fd: false});
+const input = new GioUnix.InputStream({fd: 0, close_fd: false});
 
 function send(obj) {
     output.write_all(encodeMessage(obj), null);
@@ -42,7 +43,7 @@ function recordHello(msg) {
         return;
     const dir = `${DATA}/browser-host`;
     GLib.mkdir_with_parents(dir, 0o755);
-    const record = {version: String(msg.version ?? ''), time: Date.now()};
+    const record = {version: String(msg.version ?? '').slice(0, 32), time: Date.now()};
     GLib.file_set_contents(`${dir}/seen-${msg.browser}.json`, JSON.stringify(record));
 }
 
@@ -71,13 +72,17 @@ function readNext() {
             loop.quit();
             return;
         }
+        let messages;
         try {
-            for (const msg of reader.push(bytes.toArray())) {
-                if (msg?.type === 'hello')
-                    recordHello(msg);
-            }
+            messages = reader.push(bytes.toArray());
         } catch {
-            // A malformed message from the browser: ignore it.
+            // Not the extension speaking the protocol: stop.
+            loop.quit();
+            return;
+        }
+        for (const msg of messages) {
+            if (msg?.type === 'hello')
+                recordHello(msg);
         }
         readNext();
     });
